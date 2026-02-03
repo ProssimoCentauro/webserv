@@ -5,7 +5,7 @@
 #include <vector>
 #include <map>
 
-typedef struct SLocationConfig
+typedef struct s_location_config
 {
     std::string path;                  // "/upload"
     std::vector<std::string> methods;  // GET POST
@@ -16,9 +16,9 @@ typedef struct SLocationConfig
     std::string upload_path;
     std::string cgi_extension;         // ".py"
     std::string cgi_path;              // /usr/bin/python3
-}LocationConfig;
+} LocationConfig;
 
-typedef struct SServerConfig
+typedef struct s_server_config
 {
     int listen_port;                           // 8080
     std::string root;                          // ./www
@@ -27,6 +27,6 @@ typedef struct SServerConfig
     std::map<int, std::string> error_pages;    // 404 -> ./404.html
 
     std::vector<LocationConfig> locations;
-}ServerConfig;
+} ServerConfig;
 
 #endif
