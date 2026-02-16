@@ -2,6 +2,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include "Config.hpp" // per test
+#include "parser.hpp" // per test
 
 
 
@@ -46,6 +48,14 @@ int main(int ac, char **av)
 	std::cout << "==========================================="<< std::endl;
 	std::cout << "==========================================="<< std::endl << std::endl;
 	lexer.printTok();
+	std::cout << std::endl << "*******************************************"<< std::endl;
+	std::cout << "==========================================="<< std::endl;
+	std::cout << "*******************************************"<< std::endl << std::endl;
+	std::vector<Token> t = lexer.getToken();
+	Parser paramParse(t);
+	paramParse.parser();
+	paramParse.printConfig();
+
 	
 	delete[] buffer;	
 

@@ -27,6 +27,9 @@ class Lexer
 		void printTok();
 		void tokenizer();
 		void assignType();
+		
+		
+        const std::vector<Token>& getToken() const; // per test
 				
 
 

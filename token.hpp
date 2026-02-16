@@ -10,6 +10,7 @@ enum TokenType
 	NUMBER,
 	SYMBOL,
 	PATH,
+	END,
 };
 
 struct Token

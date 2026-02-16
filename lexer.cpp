@@ -99,8 +99,8 @@ void Lexer::takeToken()
 	tok.value = std::string(input + start, pos - start);
 	tok.type = NONE;
 	tok.line = line++;
-	if(start == pos)
-		return;
+	/*if(start == pos)
+		return;*/
 	token.push_back(tok);
 }
 
@@ -158,7 +158,7 @@ void Lexer::tokenizer()
 				is_matched = true;
 				break;
 			}
-			if(i == 4 && !is_matched)
+			if(i == 2 && !is_matched)
 				pos++;
 		}
 
@@ -210,5 +210,10 @@ void Lexer::printTok()
         std::cout << "LINE: "  << token[i].line  << std::endl;
         std::cout << "----------------" << std::endl;
     }
+}
+
+const std::vector<Token>& Lexer::getToken() const
+{
+	return token;
 }
 

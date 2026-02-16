@@ -13,6 +13,7 @@ public:
     ~Config();
 
     const std::vector<ServerConfig>& getServers() const;
+    void addServer(const ServerConfig& server);
 
 private:
     std::vector<ServerConfig> _servers;

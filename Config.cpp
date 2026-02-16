@@ -13,6 +13,11 @@ Config& Config::operator=(const Config& other) {
 
 Config::~Config() {}
 
+void Config::addServer(const ServerConfig& server)
+{
+    _servers.push_back(server);
+}
+
 const std::vector<ServerConfig>& Config::getServers() const
 {
 	return _servers;
