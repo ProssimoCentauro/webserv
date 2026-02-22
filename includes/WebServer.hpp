@@ -1,7 +1,7 @@
 #ifndef WEBSERVER_HPP
 #define WEBSERVER_HPP
 
-#include <map>
+#include "WebServ.h"
 #include "Poller.hpp"
 #include "Config.hpp"
 #include "ClientConnection.hpp"
@@ -15,7 +15,7 @@ public:
     ~WebServer();
 
     void init(const Config& config);
-    void run();
+    void exec();
 
 private:
     void acceptClient(int listenFd);
@@ -23,8 +23,11 @@ private:
     void writeClient(int clientFd);
     void closeClient(int clientFd);
 
+	int createListenSocket(int port);
+
     Config _config;
     Poller _poller;
+	std::vector<int> _listenSockets;
     std::map<int, ClientConnection> _clients;
 };
 
