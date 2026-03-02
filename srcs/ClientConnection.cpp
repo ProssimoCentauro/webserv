@@ -39,6 +39,20 @@ std::string& ClientConnection::getWriteBuffer()
 	return _writeBuffer;
 }
 
+void ClientConnection::appendReadBuffer(char *buffer, ssize_t bytes)
+{
+	_readBuffer.append(buffer, bytes);
+}
+void ClientConnection::appendWriteBuffer(char *buffer, ssize_t bytes)
+{
+	_writeBuffer.append(buffer, bytes);
+}
+	
+void ClientConnection::removeBytes(ssize_t bytes)
+{
+	_writeBuffer.erase(0, bytes);
+}
+
 bool ClientConnection::requestComplete() const
 {
 	return _requestComplete;

@@ -2,7 +2,7 @@ NAME = webserv
 
 SRCSF = ./srcs/
 INCLUDESF = ./includes
-SRCS =  $(SRCSF)WebServer.cpp $(SRCSF)main.cpp
+SRCS =  $(SRCSF)WebServer.cpp $(SRCSF)Config.cpp $(SRCSF)Poller.cpp $(SRCSF)ClientConnection.cpp $(SRCSF)main.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 

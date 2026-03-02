@@ -10,4 +10,6 @@
 #include <fcntl.h>
 #include <map>
 #include <algorithm>
+#include <sstream>
+#include <stddef.h>
 #endif

@@ -24,6 +24,7 @@ private:
     void closeClient(int clientFd);
 
 	int createListenSocket(int port);
+	bool checkRequestComplete(const std::string& buffer);
 
     Config _config;
     Poller _poller;

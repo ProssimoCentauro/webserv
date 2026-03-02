@@ -2,6 +2,7 @@
 #define CLIENTCONNECTION_HPP
 
 #include <string>
+#include "WebServ.h"
 
 class ClientConnection
 {
@@ -16,6 +17,11 @@ public:
 
     std::string& getReadBuffer();
     std::string& getWriteBuffer();
+
+	void appendReadBuffer(char *buffer, ssize_t bytes);
+	void appendWriteBuffer(char *buffer, ssize_t bytes);
+	
+	void removeBytes(ssize_t	bytes);
 
     bool requestComplete() const;
     void setRequestComplete(bool value);
