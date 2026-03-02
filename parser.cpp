@@ -18,7 +18,6 @@ Parser::~Parser()
 size_t Parser::parseServer()
 {
     ServerConfig conf;
-
     if(token[pos].value == "server" && token[pos + 1].value == "{")
     {
         while(token[pos].value != "\0")
@@ -126,6 +125,11 @@ size_t Parser::parseLocation(ServerConfig& conf)
                     loc.cgi.insert(std::pair<std::string, std::string>(token[pos + 1].value, token[pos + 2].value));
                     pos++;
                 }
+                else if(token[pos].value == "return")
+                {
+                    loc.redirect.insert(std::pair<int, std::string>(stringTo<int>(token[pos + 1].value), token[pos + 2].value));
+                    pos++;
+                }
                 pos++;
             }
         }
@@ -171,6 +175,10 @@ void Parser::printConfig()
             for(std::map<std::string, std::string>::const_iterator it = c[i].locations[j].cgi.begin(); it != c[i].locations[j].cgi.end(); ++it)
             {
                 std::cout << "cgi :" << it->first << "->" << it->second << std::endl;
+            }
+            for(std::map<int, std::string>::const_iterator it = c[i].locations[j].redirect.begin(); it != c[i].locations[j].redirect.end(); ++it)
+            {
+                std::cout << "redirection : " << it->first << " -> " << it->second << std::endl;
             }
             std::cout << ":::::::::::::::::::::::" << std::endl;
          }

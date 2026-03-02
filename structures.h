@@ -19,6 +19,8 @@ typedef struct s_location_config
 
     std::map<std::string, std::string> cgi;
     size_t client_max_body_size;
+    std::map<int, std::string> redirect;
+
 } LocationConfig;
 
 typedef struct s_server_config
