@@ -25,9 +25,9 @@ typedef struct s_location_config
 
 typedef struct s_server_config
 {
-    //int listen_port;                           // 8080
+    int listen_port;                           // 8080
     std::string server_name;                      // piu server ?
-    std::vector<std::string>listen_port;          //prova per piu listen come string da convertire successivamente
+    //std::vector<int>listen_port;          //prova per piu listen come string da convertire successivamente
     std::string root;                          // ./www
     size_t client_max_body_size;               // limite POST
 

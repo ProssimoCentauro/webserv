@@ -24,7 +24,7 @@ size_t Parser::parseServer()
         {
             if(token[pos].value == "listen")
             {
-                conf.listen_port.push_back(token[pos + 1].value);
+                conf.listen_port = stringTo<int>(token[pos + 1].value);
             }
             else if(token[pos].value == "root")
             {
@@ -144,8 +144,9 @@ void Parser::printConfig()
     for(size_t i = 0; i < c.size(); i++)
     {
         std::cout << "Server #" << i << std::endl;
-        for(size_t j = 0; j < c[i].listen_port.size(); j++)
-            std::cout << "Port: " << c[i].listen_port[j] << std::endl;
+        /*for(size_t j = 0; j < c[i].listen_port.size(); j++)
+            std::cout << "Port: " << c[i].listen_port[j] << std::endl;*/
+        std::cout << "Listen_Port: " << c[i].listen_port << std::endl;
         std::cout << "Root: " << c[i].root << std::endl;
         std::cout << "Client max body size: " << c[i].client_max_body_size << std::endl;
 
