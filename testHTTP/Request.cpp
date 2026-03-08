@@ -127,7 +127,20 @@ void Request::parseHeaders()
 
 void Request::parseBody()
 {
-
+	
+	if(request_buf.find("\r\n0") == 0 || request_buf.find("0\r\n") == 0)
+	{
+		flag = 5;
+		return;
+	}
+	size_t pos = request_buf.find("\r\n");
+	std::string hex = request_buf.substr(0, pos);
+	size_t len = std::strtoul(hex.c_str(), NULL, 16);
+	while(request_buf.size() < len + 3)
+		return;
+	request_buf.erase(0, pos + 2);
+	ConfReq.body += request_buf.substr(0, len);
+	request_buf.erase(0, len);
 }
 
 std::string Request::strToLower(std::string str)
@@ -178,7 +191,6 @@ void Request::parse()
 			{
 				cleanTerminator();
 				flag = 3;
-				//return;
 			}
 			if (flag == 2 && request_buf.find("\r\n") == std::string::npos)
 		   		return;
@@ -190,50 +202,30 @@ void Request::parse()
 		}
 		if (flag == 3 && hasContentLength("content-length") == true)
 		{
-			int n = std::atoi(GetHeaderLen().c_str());
+			size_t n = std::atoi(GetHeaderLen().c_str());
 			ConfReq.body = request_buf.substr(0, n);
+			if(ConfReq.body.size() == n || n == 0)
+			{
+				flag = 5;
+				return;
+			}
 		}
+		else if(flag == 3 && hasContentLength("content-length") == false)
+		{
+			size_t pos = request_buf.find("\r\n");
+			if(pos == std::string::npos)
+				return;
+			flag = 4;
+		}
+		if(flag == 4)
+			parseBody();
+		if(flag == 5)
+			break;
 		j++;
 	}
 }
 
-/*void Request::parse()      // non funziona
-{
-	
-	std::string buffer;
-	//int j = 0;
-	
-	size_t pos = request_buf.find("\r\n");
-	if(flag == 1)
-	{
-		if(pos  == std::string::npos)
-			return;
-		else if(pos != std::string::npos)
-		{
-			parseRequestLine();
-			flag = 2;
-		}
-	}
-	if(flag == 2)
-	{
-		size_t pos = request_buf.find("\r\n\r\n");
-		if(pos == std::string::npos)
-			return;
-		parseHeaders();
-		request_buf.erase(0, pos + 4);
-		flag = 3;
-		
-	}
-	if (flag == 3 && hasContentLength("content-length") == true)
-	{
-		size_t n = std::atoi(GetHeaderLen().c_str());
-		if(request_buf.size() < n)
-			return;
-		ConfReq.body = request_buf.substr(0, n);
-		request_buf.erase(0, n);
-		flag = 4;
-	}
-}*/
+
 
 
 const RequestConfig& Request::getReqConf() const

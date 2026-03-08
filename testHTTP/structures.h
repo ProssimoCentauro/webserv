@@ -51,6 +51,7 @@ typedef struct s_request
 	REQUEST_LINE,
 	HEADERS,
 	BODY,
+	CHUNKED_BODY,
 	END
 
 } RequestState;

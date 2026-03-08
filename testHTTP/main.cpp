@@ -6,45 +6,51 @@
 
 int main()
 {
-    /*try
-    {
-        Config config;
-        WebServer server;
-
-        server.init(config);
-
-        std::cout << "Webserv running..." << std::endl;
-
-        server.exec();
-    }
-    catch (std::exception& e)
-    {
-        std::cerr << "Fatal error: " << e.what() << std::endl;
-        return 1;
-    }*/
 
 	srand(time(NULL));
 
-	std::string str = "POST /upload HTTP/1.1\r\n"
+	// *****TEST CONTENT_LENGHT BODY**********
+
+	/*std::string str = "POST /upload HTTP/1.1\r\n"
       	"Host: localhost\r\n"
-        "Content-Length: 10\r\n"
+        "ConTenT-Length: 10\r\n"
         "Connection: keep-alive\r\n"
         "\r\n"
-       	"abcdefghij";
+       	"abcdefghij";*/
 	
+	//********TEST BODY ENCODER***********
+
+	std::string str ="POST /upload HTTP/1.1\r\n"
+		"Host: localhost\r\n"
+		"Transfer-Encoding: chunked\r\n"
+		"Connection: keep-alive\r\n"
+		"\r\n"
+		"5\r\n"
+		"Hello\r\n"
+		"1\r\n"
+		" \r\n"
+		"6\r\n"
+		"World!\r\n"
+		"0\r\n"
+		"\r\n";
+
+	//*************TEST CONTENT_LENGTH a 0*************
+
+	/*std::string str = "POST /upload HTTP/1.1\r\n"
+		"Host: localhost\r\n"
+		"Content-Length: 0\r\n"
+		"\r\n";*/
 	
 	Request r;
-	/*size_t chunk = 6;
 
-	for(size_t i = 0; i < str.size(); i+= chunk)
-	{
-		size_t len = chunk;
-		if(i + len > str.size())
-			len = str.size() - i;
-		std::string chunk = str.substr(i, len);
-		r.setBuffer(chunk);
-		r.parse();
-	}*/
+	// **************TEST TRANSFER ENCODING CON CHUNK A 0**********
+	
+	/*std::string str = "POST /upload HTTP/1.1\r\n"
+		"Host: localhost\r\n"
+		"TRANSFER-Encoding: chunked\r\n"
+		"\r\n"
+		"0\r\n"
+		"\r\n";*/
 
 	
     for(int t = 0; t < 1000; t++)
@@ -79,29 +85,26 @@ int main()
 		}
 
 		std::cout << "body:" << c.body << std::endl;
-        if(c.body != "abcdefghij")
+
+		//DECOMMENTARE PER TEST CON HEADER CONTENT_LENGTH 10 E BODY "abcdefghij"
+        /*if(c.body != "abcdefghij")
         {
             std::cout << "Errore nel parsing alla run: " << t << std::endl;
             std::cout << "Body ricevuto: " << c.body << std::endl;
             //return 1;
 			break;
-        }
+        }*/
+
+
+		//DECOMMENTARE PER TEST CON HEADER TRANSEFR ENCODING  E BODY "Hello World!"
+		/*if(c.body != "Hello World!")
+        {
+            std::cout << "Errore nel parsing alla run: " << t << std::endl;
+            std::cout << "Body ricevuto: " << c.body << std::endl;
+            //return 1;
+			break;
+        }*/
     }
-
-
-	/*const RequestConfig& c = r.getReqConf();
-
-	std::cout << "method: " << c.method << std::endl;
-	std::cout << "uri: " << c.uri << std::endl;
-	std::cout << "version: " << c.version << std::endl;
-
-	for(std::map<std::string, std::string>::const_iterator it = c.headers.begin(); it != c.headers.end(); ++it)
-	{
-		std::cout << it->first << " -> " << it->second << std::endl;
-	}
-
-	std::cout << "body: " << c.body << std::endl;*/
-
     return 0;
 }
 
