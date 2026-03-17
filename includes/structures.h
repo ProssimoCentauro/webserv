@@ -36,4 +36,24 @@ typedef struct s_server_config
     std::vector<LocationConfig> locations;
 } ServerConfig;
 
+
+typedef struct s_request
+{
+	std::string method;
+	std::string uri;
+	std::string version;
+	std::map<std::string, std::string> headers;
+	std::string body;
+} RequestConfig;
+
+/*typedef struct e_state
+{
+	REQUEST_LINE,
+	HEADERS,
+	BODY,
+	CHUNKED_BODY,
+	END
+
+} RequestState;
+*/
 #endif

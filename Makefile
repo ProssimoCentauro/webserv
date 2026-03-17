@@ -2,12 +2,13 @@ NAME = webserv
 
 SRCSF = ./srcs/
 INCLUDESF = ./includes
-SRCS =  $(SRCSF)Config.cpp $(SRCSF)main.cpp $(SRCSF)lexer.cpp $(SRCSF)parser.cpp
+SRCS =  $(SRCSF)Config.cpp $(SRCSF)mainHTTP.cpp $(SRCSF)lexer.cpp $(SRCSF)parser.cpp $(SRCSF)WebServer.cpp \
+    $(SRCSF)ClientConnection.cpp $(SRCSF)Poller.cpp $(SRCSF)Request.cpp 
 
 OBJS = $(SRCS:.cpp=.o)
 
 CC = c++
-CPPFLAGS = -Wall -Wextra -Werror -std=c++98 -g -0O
+CPPFLAGS = -Wall -Wextra -Werror -std=c++98 -g
 IFLAGS = -I $(INCLUDESF)
 RM = rm -f
 

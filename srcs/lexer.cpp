@@ -1,7 +1,7 @@
 #include "lexer.hpp"
 
 
-Lexer::Lexer(char *input, size_t size): pos(0), size(size), input(input), line(0)
+Lexer::Lexer(char *input, size_t size): pos(0), size(size), input(input), line(1)
 {
 
 }
@@ -11,9 +11,23 @@ Lexer::~Lexer()
 
 }
 
+/*Lexer::ConfigException::ConfigException(std::string str): str(str)
+{
+
+}
+
+const char* Lexer::ConfigException::what() const throw()
+{
+	return(str.c_str());
+}
+
+Lexer::ConfigException::~ConfigException() throw()
+{
+
+}*/
 bool isWord(std::string &s)
 {
-	for(size_t i = 0; i <= s.size(); i++)
+	for(size_t i = 0; i < s.size(); i++)
 	{
 		if(s[i] == '{' || s[i] == '}' || s[i] == ';')
 			return(false);
@@ -23,7 +37,7 @@ bool isWord(std::string &s)
 
 bool isNumber(std::string &s)
 {
-	for(size_t i = 0; i <= s.size(); i++)
+	for(size_t i = 0; i < s.size(); i++)
 	{
 		if(!isdigit(s[i]))
 			return(false);
@@ -40,7 +54,7 @@ bool Lexer::isSymbol()
 
 bool Lexer::isPath()
 {
-	if((input[0] == '.' && input[0] == '/'))
+	if((input[0] == '.' && input[1] == '/'))
 		return(true);
 	return(false);
 }
@@ -48,7 +62,11 @@ bool Lexer::isPath()
 bool Lexer::isSpace()
 {
 	if(input[pos] == ' ' || input[pos] == '\r' || input[pos] == '\t' || input[pos] == '\n')
+	{
+		if(input[pos] == '\n')
+			line++;
 		return(true);
+	}
 	return(false);
 }
 
@@ -63,29 +81,16 @@ void Lexer::lexSymbol()
 {
 	size_t start = pos;
 	Token tok;
-	while(pos < size && isSymbol() == true)
+	/*while(pos < size && isSymbol() == true)
+		pos++;*/
+	if(isSymbol() == true)
 		pos++;
 	tok.value = std::string(input + start, pos - start);
 	tok.type = SYMBOL;
-	tok.line = line++;
+	tok.line = line;
 	token.push_back(tok);
 }
 
-/*void Lexer::lexPath()
-{
-	size_t start = pos;
-	Token tok;	
-	while(pos < size  && !isSpace() && !isSymbol())
-	{
-		//std::cout << "prima dell'incremento" << std::endl;
-		pos++;
-	}
-	tok.value = std::string(input + start, pos - start);
-	//std::cout << "dopo token value?" << std::endl;
-	tok.type = PATH;
-	tok.line = 3;
-	token.push_back(tok);
-}*/
 
 void Lexer::takeToken()
 {
@@ -98,9 +103,9 @@ void Lexer::takeToken()
 	}
 	tok.value = std::string(input + start, pos - start);
 	tok.type = NONE;
-	tok.line = line++;
-	/*if(start == pos)
-		return;*/
+	tok.line = line;
+	if(start == pos)
+		return;
 	token.push_back(tok);
 }
 
@@ -216,4 +221,6 @@ const std::vector<Token>& Lexer::getToken() const
 {
 	return token;
 }
+
+
 
