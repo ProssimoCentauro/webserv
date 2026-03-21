@@ -3,35 +3,62 @@
 
 #include <string>
 #include <map>
+#include "structures.h"
+#include <cstdlib>
 
-class Request
+class Request 
 {
-public:
-    Request();
-    Request(const Request& other);
-    Request& operator=(const Request& other);
-    ~Request();
+	private:
+			std::string request_buf;
+			RequestConfig ConfReq;
+			typedef enum e_state
+			{
+				REQUEST_LINE,
+				HEADERS,
+				BODY_CONTENT,
+				BODY_CHUNK,
+				DONE
+			} Requeststate;
+			Requeststate state;
+	
+	public:
+			Request(std::string request_buf);
+			Request();
+			Request(const Request& other);
+			Request& operator=(const Request& other);
+			~Request();
+			void setBuffer(std::string buf);
+			void parseRequestLine();
+			void parseHeaders();
+			void parseBody();
+			void parse();
+			std::string extractToken(std::string str);
+			bool is_space(char c);
+			bool is_crlf(char c);
+			bool is_digit(char c);
+			void cleanTerminator();
+			std::string strToLower(std::string str);
+			const RequestConfig& getReqConf() const;
 
-    void append(const std::string& data);
-    bool isComplete() const;
+			bool hasContentLength(std::string s);
+			std::string GetHeaderLen();
+			std::string extractHeader(std::string str);
+			bool is_number(std::string str);
+			std::string strTrim(std::string str, size_t pos);
+			bool isDone() const;
 
-    const std::string& getMethod() const;
-    const std::string& getPath() const;
-    const std::string& getVersion() const;
-    const std::map<std::string, std::string>& getHeaders() const;
-    const std::string& getBody() const;
-
-private:
-    void parse();
-
-    std::string _raw;
-    std::string _method;
-    std::string _path;
-    std::string _version;
-    std::map<std::string, std::string> _headers;
-    std::string _body;
-    bool _parsed;
+			class RequestException : public std::exception
+			{
+				private:
+						int code;
+				public:
+						RequestException(int code);
+						int getCode() const; 
+						virtual const char* what() const throw();
+			};
+		
 };
+
 
 #endif
 

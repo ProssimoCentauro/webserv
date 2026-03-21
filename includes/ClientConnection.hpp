@@ -3,6 +3,7 @@
 
 #include <string>
 #include "WebServ.h"
+#include "Request.hpp"
 
 class ClientConnection
 {
@@ -25,11 +26,14 @@ public:
 
     bool requestComplete() const;
     void setRequestComplete(bool value);
+	Request& getRequest();
 
 private:
     int _fd;
     std::string _readBuffer;
     std::string _writeBuffer;
+
+	Request request;
     bool _requestComplete;
 };
 

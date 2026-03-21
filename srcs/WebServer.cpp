@@ -45,6 +45,10 @@ void WebServer::readClient(int clientFd)
 	char buffer[4096];
 	ssize_t readedBytes = recv(clientFd, buffer, sizeof(buffer), 0);
 	
+	std::cout << "[DEBUG] readClient called on fd=" << clientFd 
+          << " bytes=" << readedBytes << std::endl;
+	std::cout << "Buffer content:\n" << std::string(buffer, readedBytes) << std::endl;
+
 	if (readedBytes <= 0)
 	{
 		closeClient(clientFd);
@@ -56,24 +60,41 @@ void WebServer::readClient(int clientFd)
 	
 	if (checkRequestComplete(client.getReadBuffer()))
 	{
-		std::string body = "Hello from webserv";
+		try
+		{
+			std::cout << "REQUEST RECEIVED:\n";
+			std::cout << client.getReadBuffer() << std::endl;
 
-        std::string response;
-        response  = "HTTP/1.1 200 OK\r\n";
-        response += "Content-Length: ";
-        std::stringstream ss;
-		ss << body.length();
-		response += ss.str();
-		response += "\r\n";
-        response += "Content-Type: text/plain\r\n";
-        response += "Connection: close\r\n";
-        response += "\r\n";
-        response += body;
+			Request req;
+			req.setBuffer(client.getReadBuffer());
+			req.parse();
 
-		client.getWriteBuffer() = response;
+			std::cout << "Request parsed" << std::endl;
 
-		_poller.setEvents(clientFd, POLLOUT);
-		client.setRequestComplete(true);
+
+			std::string body = "Hello from webserv";
+			std::string response;
+			response  = "HTTP/1.1 200 OK\r\n";
+			response += "Content-Length: ";
+			std::stringstream ss;
+			ss << body.length();
+			response += ss.str();
+			response += "\r\n";
+			response += "Content-Type: text/plain\r\n";
+			response += "Connection: close\r\n";
+			response += "\r\n";
+			response += body;
+
+			client.getWriteBuffer() = response;
+
+			_poller.setEvents(clientFd, POLLOUT);
+			client.setRequestComplete(true);
+		}
+		catch(const Request::RequestException &e)
+		{
+			std::cout << "Request parsing error: " << e.what() << std::endl;
+			closeClient(clientFd);
+		}
 	}
 }
 
