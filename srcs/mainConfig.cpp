@@ -71,6 +71,12 @@ int main(int ac, char **av)
 		std::cout << e.what() << std::endl;
 	}
 
+
+	WebServer server;
+	Config config = Parser.getConfig();
+
+
+
 	
 	delete[] buffer;	
 
