@@ -40,62 +40,74 @@ void WebServer::acceptClient(int listenFd)
 	_clients[clientFd] = client;
 	_poller.addFd(clientFd, POLLIN);
 }
+
 void WebServer::readClient(int clientFd)
 {
-	char buffer[4096];
-	ssize_t readedBytes = recv(clientFd, buffer, sizeof(buffer), 0);
-	
-	std::cout << "[DEBUG] readClient called on fd=" << clientFd 
-          << " bytes=" << readedBytes << std::endl;
-	std::cout << "Buffer content:\n" << std::string(buffer, readedBytes) << std::endl;
+    char buffer[4096];
+    ssize_t readedBytes = recv(clientFd, buffer, sizeof(buffer), 0);
 
-	if (readedBytes <= 0)
-	{
-		closeClient(clientFd);
-		return;
-	}
+    if (readedBytes <= 0)
+    {
+        closeClient(clientFd);
+        return;
+    }
 
-	ClientConnection& client = _clients[clientFd];
-	client.appendReadBuffer(buffer, readedBytes);
-	
-	if (checkRequestComplete(client.getReadBuffer()))
-	{
+    ClientConnection& client = _clients[clientFd];
+    client.appendReadBuffer(buffer, readedBytes);
+
+    try
+    {
+        Request req;
+        req.setBuffer(client.getReadBuffer());
+		std::cout << "STATE: " << req.isDone() << std::endl;
+
 		try
 		{
-			std::cout << "REQUEST RECEIVED:\n";
-			std::cout << client.getReadBuffer() << std::endl;
-
-			Request req;
-			req.setBuffer(client.getReadBuffer());
 			req.parse();
-
-			std::cout << "Request parsed" << std::endl;
-
-
-			std::string body = "Hello from webserv";
-			std::string response;
-			response  = "HTTP/1.1 200 OK\r\n";
-			response += "Content-Length: ";
-			std::stringstream ss;
-			ss << body.length();
-			response += ss.str();
-			response += "\r\n";
-			response += "Content-Type: text/plain\r\n";
-			response += "Connection: close\r\n";
-			response += "\r\n";
-			response += body;
-
-			client.getWriteBuffer() = response;
-
-			_poller.setEvents(clientFd, POLLOUT);
-			client.setRequestComplete(true);
 		}
 		catch(const Request::RequestException &e)
 		{
 			std::cout << "Request parsing error: " << e.what() << std::endl;
-			closeClient(clientFd);
+
+			std::string response;
+			response  = "HTTP/1.1 400 Bad Request\r\n";
+			response += "Content-Length: 0\r\n";
+			response += "Connection: close\r\n";
+			response += "\r\n";
+
+			ClientConnection& client = _clients[clientFd];
+			client.getWriteBuffer() = response;
+
+			_poller.setEvents(clientFd, POLLOUT);
+			return;
 		}
-	}
+
+
+        if (!req.isDone())
+            return;
+
+        std::cout << "REQUEST RECEIVED:\n";
+        std::cout << client.getReadBuffer() << std::endl;
+
+        client.getReadBuffer().clear();
+
+        std::string body = "Hello from webserv";
+        std::string response;
+        response  = "HTTP/1.1 200 OK\r\n";
+        std::stringstream ss;
+		ss << body.length();
+		response += "Content-Length: " + ss.str() + "\r\n";
+		response += "Content-Type: text/plain\r\n";
+        response += "Connection: close\r\n\r\n";
+        response += body;
+
+        client.getWriteBuffer() = response;
+        _poller.setEvents(clientFd, POLLOUT);
+    }
+    catch (...)
+    {
+        closeClient(clientFd);
+    }
 }
 
 void WebServer::writeClient(int clientFd)

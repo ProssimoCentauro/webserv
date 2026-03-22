@@ -32,7 +32,7 @@ class Request
 			void parseHeaders();
 			void parseBody();
 			void parse();
-			std::string extractToken(std::string str);
+			std::string extractToken();
 			bool is_space(char c);
 			bool is_crlf(char c);
 			bool is_digit(char c);
@@ -42,7 +42,7 @@ class Request
 
 			bool hasContentLength(std::string s);
 			std::string GetHeaderLen();
-			std::string extractHeader(std::string str);
+			std::string extractHeader();
 			bool is_number(std::string str);
 			std::string strTrim(std::string str, size_t pos);
 			bool isDone() const;

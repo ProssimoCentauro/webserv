@@ -37,6 +37,8 @@ class Parser
             bool validateMethods(LocationConfig& loc);
             void validateLocation(LocationConfig& loc);
             //std::string assignAndIncrese(size_t n);
+			
+			Config& getConfig();
 
 		class ConfigException : public std::exception
 		{

@@ -1,4 +1,4 @@
-#include "parser.hpp"
+#include "Parser.hpp"
 
 Parser::Parser(): pos(0),config()
 {
@@ -325,4 +325,9 @@ void Parser::printConfig()
             std::cout << ":::::::::::::::::::::::" << std::endl;
          }
     }
+}
+		
+Config& Parser::getConfig()
+{
+	return config;
 }

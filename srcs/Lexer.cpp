@@ -1,4 +1,4 @@
-#include "lexer.hpp"
+#include "Lexer.hpp"
 
 
 Lexer::Lexer(char *input, size_t size): pos(0), size(size), input(input), line(1)
