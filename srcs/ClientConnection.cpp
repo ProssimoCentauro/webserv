@@ -62,3 +62,8 @@ void ClientConnection::setRequestComplete(bool value)
 {
 	_requestComplete = value;
 }
+
+Request& ClientConnection::getRequest()  //aggiunto getters per oggetto request
+{
+	return(request);
+}
