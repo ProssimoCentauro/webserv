@@ -17,10 +17,9 @@ class Parser
     public:
             Parser();
             Parser(const std::vector<Token> &token);
+            Parser(const Parser& other);
+            Parser& operator=(const Parser& other);
             ~Parser();
-            //size_t parseServer();
-            //size_t parseLocation(ServerConfig& conf);
-            //void parser();
             void printConfig(); // test
             bool isNumber(std::string &s);
 
@@ -36,7 +35,8 @@ class Parser
             bool check_brackets();
             bool validateMethods(LocationConfig& loc);
             void validateLocation(LocationConfig& loc);
-            //std::string assignAndIncrese(size_t n);
+			
+			Config& getConfig();
 
 		class ConfigException : public std::exception
 		{

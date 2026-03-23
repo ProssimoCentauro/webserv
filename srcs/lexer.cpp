@@ -1,4 +1,4 @@
-#include "lexer.hpp"
+#include "Lexer.hpp"
 
 
 Lexer::Lexer(char *input, size_t size): pos(0), size(size), input(input), line(1)
@@ -11,20 +11,24 @@ Lexer::~Lexer()
 
 }
 
-/*Lexer::ConfigException::ConfigException(std::string str): str(str)
+Lexer::Lexer(const Lexer& other): pos(other.pos), size(other.size), input(other.input), token(other.token), line(other.line)
 {
 
 }
 
-const char* Lexer::ConfigException::what() const throw()
+Lexer& Lexer::operator=(const Lexer& other)
 {
-	return(str.c_str());
+	if(this != &other)
+	{
+		pos = other.pos;
+		size = other.size;
+		input = other.input;
+		token = other.token;
+		line = other.line;
+	}
+	return(*this);
 }
 
-Lexer::ConfigException::~ConfigException() throw()
-{
-
-}*/
 bool isWord(std::string &s)
 {
 	for(size_t i = 0; i < s.size(); i++)

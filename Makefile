@@ -3,9 +3,8 @@ NAME = webserv
 SRCSF = ./srcs/
 INCLUDESF = ./includes
 
-SRCS =  $(SRCSF)Config.cpp $(SRCSF)mainHTTP.cpp $(SRCSF)lexer.cpp $(SRCSF)parser.cpp $(SRCSF)WebServer.cpp \
-    $(SRCSF)ClientConnection.cpp $(SRCSF)Poller.cpp $(SRCSF)Request.cpp $(SRCSF)WebServer.cpp $(SRCSF)Config.cpp \
-		$(SRCSF)Poller.cpp $(SRCSF)ClientConnection.cpp $(SRCSF)main.cpp
+SRCS =  $(SRCSF)Config.cpp $(SRCSF)Lexer.cpp $(SRCSF)Parser.cpp $(SRCSF)WebServer.cpp \
+    $(SRCSF)ClientConnection.cpp $(SRCSF)Poller.cpp $(SRCSF)Request.cpp $(SRCSF)mainConfig.cpp \
 
 OBJS = $(SRCS:.cpp=.o)
 

@@ -1,9 +1,10 @@
-#include "lexer.hpp"
+#include "Lexer.hpp"
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include "Config.hpp" // per test
-#include "parser.hpp" // per test
+#include "Parser.hpp" // per test
+#include "WebServer.hpp"
 
 
 
@@ -44,6 +45,9 @@ int main(int ac, char **av)
 	}
 	close(fd);
 
+
+	Config config;
+
 	try
 	{
 		Lexer lexer(buffer, size);
@@ -60,6 +64,7 @@ int main(int ac, char **av)
 		std::vector<Token> t = lexer.getToken();
 		Parser paramParse(t);
 		paramParse.parser();
+		config = paramParse.getConfig();
 		std::cout << "\n" << "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*" << std::endl;
 		std::cout << "PRIMA DELLA STAMPA" << std::endl;
 		paramParse.printConfig();
@@ -70,6 +75,14 @@ int main(int ac, char **av)
 	{
 		std::cout << e.what() << std::endl;
 	}
+
+
+	WebServer server;
+	server.init(config);
+	std::cout << "webserv running..." << std::endl;
+	server.exec();
+
+
 
 	
 	delete[] buffer;	
