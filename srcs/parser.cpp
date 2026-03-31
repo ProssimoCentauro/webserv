@@ -1,4 +1,4 @@
-#include "parser.hpp"
+#include "Parser.hpp"
 
 Parser::Parser(): pos(0),config()
 {
@@ -8,6 +8,22 @@ Parser::Parser(): pos(0),config()
 Parser::Parser(const std::vector<Token> &token): pos(0), token(token),config()
 {
 
+}
+
+Parser::Parser(const Parser& other): pos(other.pos), token(other.token), config(other.config)
+{
+
+}
+
+Parser& Parser::operator=(const Parser& other)
+{
+    if(this != &other)
+    {
+        pos = other.pos;
+        token = other.token;
+        config = other.config;
+    }
+    return(*this);
 }
 
 Parser::~Parser()
@@ -325,4 +341,9 @@ void Parser::printConfig()
             std::cout << ":::::::::::::::::::::::" << std::endl;
          }
     }
+}
+		
+Config& Parser::getConfig()
+{
+	return config;
 }
