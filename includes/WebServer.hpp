@@ -5,6 +5,7 @@
 #include "Poller.hpp"
 #include "Config.hpp"
 #include "ClientConnection.hpp"
+#include "Response.hpp"
 
 class WebServer
 {

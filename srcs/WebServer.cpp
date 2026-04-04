@@ -44,71 +44,57 @@ void WebServer::acceptClient(int listenFd)
 void WebServer::readClient(int clientFd)
 {
     char buffer[4096];
-    ssize_t readedBytes = recv(clientFd, buffer, sizeof(buffer), 0);
+    ssize_t bytes = recv(clientFd, buffer, sizeof(buffer), 0);
 
-    if (readedBytes <= 0)
+    if (bytes <= 0)
     {
         closeClient(clientFd);
         return;
     }
 
     ClientConnection& client = _clients[clientFd];
-    client.appendReadBuffer(buffer, readedBytes);
+    client.appendReadBuffer(buffer, bytes);
 
     try
     {
         Request req;
         req.setBuffer(client.getReadBuffer());
-		std::cout << "STATE: " << req.isDone() << std::endl;
-		//test
-		RequestConfig Creq = req.getReqConf();
-		if (Creq.uri != "/favicon.ico")
-    		std::cout << "\n" << "*****RAW REQUEST:*****\n" << client.getReadBuffer() <<std::endl;
 
-		try
-		{
-			req.parse();
-			std::cout << " ========= PARSE REQUEST: ********\n" << std::endl;
-			req.printHttp();
-		}
-		catch(const Request::RequestException &e)
-		{
-			std::cout << "Request parsing error: " << e.what() << std::endl;
+        try
+        {
+            req.parse();
+        }
+        catch (const Request::RequestException &e)
+        {
+            std::cout << "Request parsing error\n";
 
-			std::string response;
-			response  = "HTTP/1.1 400 Bad Request\r\n";
-			response += "Content-Length: 0\r\n";
-			response += "Connection: close\r\n";
-			response += "\r\n";
+            std::string response;
+            response  = "HTTP/1.1 400 Bad Request\r\n";
+            response += "Content-Length: 0\r\n";
+            response += "Connection: close\r\n\r\n";
 
-			ClientConnection& client = _clients[clientFd];
-			client.getWriteBuffer() = response;
+            client.getWriteBuffer() = response;
+            _poller.setEvents(clientFd, POLLOUT);
+            return;
+        }
 
-			_poller.setEvents(clientFd, POLLOUT);
-			return;
-		}
-
-
+        // non completeed request -> wait recv
         if (!req.isDone())
             return;
 
-        std::cout << "REQUEST RECEIVED:\n";
+        // DEBUG
+        std::cout << "REQUEST COMPLETE\n";
         std::cout << client.getReadBuffer() << std::endl;
 
-        client.getReadBuffer().clear();
+        const RequestConfig& conf = req.getReqConf();
 
-        std::string body = "Hello from webserv";
-        std::string response;
-        response  = "HTTP/1.1 200 OK\r\n";
-        std::stringstream ss;
-		ss << body.length();
-		response += "Content-Length: " + ss.str() + "\r\n";
-		response += "Content-Type: text/plain\r\n";
-        response += "Connection: close\r\n\r\n";
-        response += body;
+        std::string response = Response::buildResponse(conf);
 
         client.getWriteBuffer() = response;
         _poller.setEvents(clientFd, POLLOUT);
+
+        // ⚠️ buffer reset
+        client.getReadBuffer().clear();
     }
     catch (...)
     {
