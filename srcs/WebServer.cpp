@@ -60,10 +60,16 @@ void WebServer::readClient(int clientFd)
         Request req;
         req.setBuffer(client.getReadBuffer());
 		std::cout << "STATE: " << req.isDone() << std::endl;
+		//test
+		RequestConfig Creq = req.getReqConf();
+		if (Creq.uri != "/favicon.ico")
+    		std::cout << "\n" << "*****RAW REQUEST:*****\n" << client.getReadBuffer() <<std::endl;
 
 		try
 		{
 			req.parse();
+			std::cout << " ========= PARSE REQUEST: ********\n" << std::endl;
+			req.printHttp();
 		}
 		catch(const Request::RequestException &e)
 		{

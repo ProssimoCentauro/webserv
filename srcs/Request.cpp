@@ -1,4 +1,5 @@
 #include "Request.hpp"
+#include <iostream>
 
 
 Request::Request(std::string request_buf): request_buf(request_buf)
@@ -112,24 +113,27 @@ std::string Request::extractToken()
     return token;
 }
 
-std::string Request::extractHeader()
+std::string Request::extractHeader(std::string& line)
 {
     size_t i = 0;
 
-    while(i < request_buf.size() && (is_space(request_buf[i]) || is_crlf(request_buf[i])))
+    while(i < line.size() && (is_space(line[i]) || is_crlf(line[i])))
         i++;
 
     size_t start = i;
 
-    while(i < request_buf.size() && request_buf[i] != '\r' && request_buf[i] != ':')
+    while(i < line.size() && line[i] != '\r')
+    {
+        i++;
+        if(line[i] == ':' && line[i + 1] && is_space(line[i + 1]))
+            break;
+    }
+    std::string key = line.substr(start, i - start);
+
+    if (i < line.size() && line[i] == ':')
         i++;
 
-    std::string key = request_buf.substr(start, i - start);
-
-    if (i < request_buf.size() && request_buf[i] == ':')
-        i++;
-
-    request_buf.erase(0, i);
+    line.erase(0, i);
 
     return key;
 }
@@ -154,40 +158,48 @@ void Request::parseRequestLine()
     cleanTerminator();
 }
 
-void Request::parseHeaders()
+void Request::parseHeaders(std::string line)
 {
-    size_t line_end = request_buf.find("\r\n");
-    if (line_end == std::string::npos)
-        return;
+        while(!line.empty())
+        {
+            if(line.find("\r\n") == 0)
+            {
+                line.erase(0, 2);
+                if(line.empty())
+                    break;
+            }
+            size_t line_end = line.find("\n");
 
-    std::string line = request_buf.substr(0, line_end);
-    request_buf.erase(0, line_end + 2);
+            std::string headers = line.substr(0, line_end);
+            line.erase(0, headers.size() - 1);
 
-    size_t pos = line.find(':');
-    if (pos == std::string::npos)
-        throw RequestException(400);
 
-std::string key = strToLower(extractHeader());
-std::string value = extractHeader();
+            size_t pos = headers.find(':');
+            if (pos == std::string::npos)
+                throw RequestException(400);
 
-    // trim spazio iniziale value
-    size_t i = 0;
-    while (i < value.size() && is_space(value[i]))
-        i++;
-    value.erase(0, i);
+            std::string key = strToLower(extractHeader(headers));
+            std::string value = extractHeader(headers);
 
-    if (ConfReq.headers.count(key))
-        throw RequestException(400);
+            size_t i = 0;
+            while (i < value.size() && is_space(value[i]))
+                i++;
+            value.erase(0, i);
 
-    if (key == "content-length" && !is_number(value))
-        throw RequestException(400);
+            if (ConfReq.headers.count(key))
+                throw RequestException(400);
 
-    ConfReq.headers.insert(std::make_pair(key, value));
+            if (key == "content-length" && !is_number(value))
+                throw RequestException(400);
 
-    if (ConfReq.headers.count("content-length") &&
-			ConfReq.headers.count("transfer-encoding"))
-        throw RequestException(400);
+            ConfReq.headers.insert(std::make_pair(key, value));
+
+            if (ConfReq.headers.count("content-length") &&
+                    ConfReq.headers.count("transfer-encoding"))
+                throw RequestException(400);
+        }
 }
+
 
 void Request::parseBody()
 {
@@ -252,17 +264,21 @@ void Request::parse()
 
         if (state == HEADERS)
         {
-			if (request_buf.substr(0, 2) == "\r\n")
+            size_t pos = request_buf.find("\r\n\r\n");
+            if(pos != std::string::npos)
+            {
+                std::string line = request_buf.substr(0, pos + 2);
+                request_buf.erase(0, pos + 2);
+                parseHeaders(line);
+            }
+            else
+                throw RequestException(400);
+
+            if (request_buf.substr(0, 2) == "\r\n")
 			{
 				request_buf.erase(0, 2);
 				state = BODY_CONTENT;
 			}
-
-            size_t pos = request_buf.find("\r\n");
-            if (pos == std::string::npos)
-                return;
-
-            parseHeaders();
         }
 
         if (state == BODY_CONTENT && hasContentLength("content-length"))
@@ -296,4 +312,15 @@ bool   Request::isDone() const
 const RequestConfig& Request::getReqConf() const
 {
 	return(ConfReq);
+}
+
+
+//per test
+
+void Request::printHttp()
+{
+    for(std::map<std::string, std::string>::const_iterator it = ConfReq.headers.begin(); it != ConfReq.headers.end(); ++it)
+    {
+        std::cout << it->first << " -> " << it->second << std::endl;
+    }
 }

@@ -29,7 +29,7 @@ class Request
 			~Request();
 			void setBuffer(std::string buf);
 			void parseRequestLine();
-			void parseHeaders();
+			//void parseHeaders();
 			void parseBody();
 			void parse();
 			std::string extractToken();
@@ -42,10 +42,15 @@ class Request
 
 			bool hasContentLength(std::string s);
 			std::string GetHeaderLen();
-			std::string extractHeader();
+			//std::string extractHeader();
 			bool is_number(std::string str);
 			std::string strTrim(std::string str, size_t pos);
 			bool isDone() const;
+
+			//test
+			void parseHeaders(std::string line);
+			std::string extractHeader(std::string& line);
+			void printHttp();
 
 			class RequestException : public std::exception
 			{

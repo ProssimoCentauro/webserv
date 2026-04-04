@@ -10,6 +10,22 @@ Parser::Parser(const std::vector<Token> &token): pos(0), token(token),config()
 
 }
 
+Parser::Parser(const Parser& other): pos(other.pos), token(other.token), config(other.config)
+{
+
+}
+
+Parser& Parser::operator=(const Parser& other)
+{
+    if(this != &other)
+    {
+        pos = other.pos;
+        token = other.token;
+        config = other.config;
+    }
+    return(*this);
+}
+
 Parser::~Parser()
 {
     

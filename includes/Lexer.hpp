@@ -11,14 +11,14 @@ class Lexer
 		size_t  pos;
 		size_t size;
 		const char *input;
-		//void lexNumber();
 		void lexSymbol();
-		//void lexPath();
 		void takeToken();
 		std::vector<Token> token;
 	public:
 		int line;
 		Lexer(char *input, size_t size);
+		Lexer(const Lexer& other);
+		Lexer& operator=(const Lexer& other);
 		~Lexer();
 		bool isSymbol();
 		bool isPath();
