@@ -1,1 +1,1 @@
-data=ciao+bella
+ciao bella

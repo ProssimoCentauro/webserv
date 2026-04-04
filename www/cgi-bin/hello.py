@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 print("Content-Type: text/html\n")
+
 print("<html><body>")
-print("<h1>Hello from Python CGI 🐍</h1>")
+print("<h1>🐍 Python CGI works!</h1>")
 print("</body></html>")

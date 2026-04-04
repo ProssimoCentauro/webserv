@@ -1,14 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Webserv</title>
+    <title>Webserv Dashboard</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <h1>🚀 Webserv is working!</h1>
 
-    <p><a href="/files">List files</a></p>
-    <p><a href="/upload.html">Upload file</a></p>
-    <p><a href="/cgi-bin/hello.py">Run Python CGI</a></p>
-    <p><a href="/cgi-bin/test.sh">Run Bash CGI</a></p>
+<h1>🚀 Webserv Control Panel</h1>
+
+<div class="card">
+    <h2>GET</h2>
+    <button onclick="testGet()">Test GET /</button>
+    <button onclick="testFile()">GET file</button>
+</div>
+
+<div class="card">
+    <h2>POST</h2>
+    <textarea id="postData" placeholder="Write something..."></textarea>
+    <button onclick="testPost()">Send POST</button>
+</div>
+
+<div class="card">
+    <h2>DELETE</h2>
+    <button onclick="testDelete()">Delete test file</button>
+</div>
+
+<div class="card">
+    <h2>CGI</h2>
+    <button onclick="runCgi()">Run Python CGI</button>
+</div>
+
+<div class="card">
+    <h2>Navigation</h2>
+    <a href="/files">📁 File Explorer</a><br>
+    <a href="/upload.html">⬆ Upload Page</a>
+</div>
+
+<pre id="output"></pre>
+
+<script src="/script.js"></script>
 </body>
 </html>
