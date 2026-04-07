@@ -4,7 +4,7 @@ SRCSF = ./srcs/
 INCLUDESF = ./includes
 
 SRCS =  $(SRCSF)Config.cpp $(SRCSF)Lexer.cpp $(SRCSF)Parser.cpp $(SRCSF)WebServer.cpp \
-    $(SRCSF)ClientConnection.cpp $(SRCSF)Poller.cpp $(SRCSF)Request.cpp $(SRCSF)mainConfig.cpp \
+    $(SRCSF)ClientConnection.cpp $(SRCSF)Poller.cpp $(SRCSF)Request.cpp $(SRCSF)mainConfig.cpp $(SRCSF)Response.cpp\
 
 OBJS = $(SRCS:.cpp=.o)
 

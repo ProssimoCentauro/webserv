@@ -70,17 +70,17 @@ int main(int ac, char **av)
 		paramParse.printConfig();
 		std::cout << "\n" << "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*" << std::endl;
 		std::cout << "FINISH CONFIG FILE" << std::endl;
+
+		WebServer server;
+		server.init(config);
+		std::cout << "webserv running..." << std::endl;
+		server.exec();
 	}
 	catch(const std::exception &e)
 	{
 		std::cout << e.what() << std::endl;
 	}
 
-
-	WebServer server;
-	server.init(config);
-	std::cout << "webserv running..." << std::endl;
-	server.exec();
 
 
 

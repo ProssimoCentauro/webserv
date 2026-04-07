@@ -33,7 +33,7 @@ private:
     std::string _readBuffer;
     std::string _writeBuffer;
 
-	Request request;
+	Request _request;
     bool _requestComplete;
 };
 

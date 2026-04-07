@@ -44,6 +44,7 @@ typedef struct s_request
 	std::string version;
 	std::map<std::string, std::string> headers;
 	std::string body;
+    std::map<std::string, std::string> cookie;
 } RequestConfig;
 
 /*typedef struct e_state
