@@ -323,4 +323,33 @@ void Request::printHttp()
     {
         std::cout << it->first << " -> " << it->second << std::endl;
     }
+
+    std::cout << "\n" << "*****Print Cookies********" << std::endl;
+    for(std::map<std::string, std::string>::const_iterator it = ConfReq.cookie.begin(); it != ConfReq.cookie.end(); ++it)
+    {
+        std::cout << it->first << " -> " << it->second << std::endl;
+    }
+}
+
+
+void Request::parseCookie()
+{
+    
+    for(std::map<std::string, std::string>::const_iterator it = ConfReq.headers.begin(); it != ConfReq.headers.end(); ++it)
+    {
+        if(it->first == "cookie")
+        {
+            std::string str = it->second;
+            if(!str.empty())
+            {
+                size_t pos = str.find('=');
+                std::string s1 = str.substr(0, pos);
+                pos++;
+                std::string s2 = str.erase(0, pos);
+                ConfReq.cookie.insert(std::make_pair(s1, s2));
+            }
+        }
+
+    }
+
 }

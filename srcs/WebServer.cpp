@@ -63,6 +63,7 @@ void WebServer::readClient(int clientFd)
         try
         {
             req.parse();
+            req.parseCookie();
         }
         catch (const Request::RequestException &e)
         {
@@ -88,12 +89,15 @@ void WebServer::readClient(int clientFd)
 
         const RequestConfig& conf = req.getReqConf();
 
+        //DEBUG
+        std::cout << "******************* TEST HEADERS **********" << std::endl;
+        req.printHttp();
+
         std::string response = Response::buildResponse(conf);
 
         client.getWriteBuffer() = response;
         _poller.setEvents(clientFd, POLLOUT);
 
-        // ⚠️ buffer reset
         client.getReadBuffer().clear();
     }
     catch (...)

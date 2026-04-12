@@ -51,6 +51,7 @@ class Request
 			void parseHeaders(std::string line);
 			std::string extractHeader(std::string& line);
 			void printHttp();
+			void parseCookie(); //TEst
 
 			class RequestException : public std::exception
 			{
