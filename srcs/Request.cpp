@@ -1,5 +1,5 @@
 #include "Request.hpp"
-#include <iostream>
+#include "WebServ.h"
 
 
 Request::Request(std::string request_buf): request_buf(request_buf)
@@ -331,25 +331,32 @@ void Request::printHttp()
     }
 }
 
-
 void Request::parseCookie()
 {
-    
-    for(std::map<std::string, std::string>::const_iterator it = ConfReq.headers.begin(); it != ConfReq.headers.end(); ++it)
+    std::map<std::string, std::string>::iterator it;
+
+    it = ConfReq.headers.find("cookie");
+    if (it == ConfReq.headers.end())
+        return;
+
+    std::string cookies = it->second;
+    std::stringstream ss(cookies);
+    std::string pair;
+
+    while (std::getline(ss, pair, ';'))
     {
-        if(it->first == "cookie")
-        {
-            std::string str = it->second;
-            if(!str.empty())
-            {
-                size_t pos = str.find('=');
-                std::string s1 = str.substr(0, pos);
-                pos++;
-                std::string s2 = str.erase(0, pos);
-                ConfReq.cookie.insert(std::make_pair(s1, s2));
-            }
-        }
+        size_t pos = pair.find('=');
+        if (pos == std::string::npos)
+            continue;
 
+        std::string key = pair.substr(0, pos);
+        std::string value = pair.substr(pos + 1);
+
+        while (!key.empty() && key[0] == ' ')
+            key.erase(0, 1);
+        while (!value.empty() && value[0] == ' ')
+            value.erase(0, 1);
+
+        ConfReq.cookie[key] = value;
     }
-
 }

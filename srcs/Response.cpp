@@ -1,11 +1,5 @@
 #include "Response.hpp"
-#include <sstream>
-#include <fstream>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <cstdlib>
-#include <fcntl.h>
-#include <sys/wait.h>
+#include "WebServ.h"
 
 Response::Response()
 : _statusCode(200), _statusMessage("OK"), _contentType("text/html") {}
@@ -66,10 +60,8 @@ std::string Response::buildResponse(const RequestConfig& req)
 }
 
 /* ================= GET ================= */
-
 std::string Response::handleGet(const RequestConfig& req)
 {
-    // CGI detection
     if (req.uri.find("/cgi-bin/") == 0)
         return executeCgi(req);
 
@@ -91,7 +83,16 @@ std::string Response::handleGet(const RequestConfig& req)
     res.setBody(body);
     res.setContentType(getContentType(path));
 
-    res.addHeader("Set-Cookie", "session=" + generateSessionId());
+    std::map<std::string,std::string>::const_iterator it =
+        req.cookie.find("session");
+
+    if (it == req.cookie.end())
+    {
+        std::string newSession = generateSessionId();
+        res.addHeader("Set-Cookie", "session=" + newSession + "; Path=/");
+    }
+    else
+        std::cout << "SESSION ID: " << it->second << std::endl;
 
     return res.build();
 }
@@ -150,7 +151,7 @@ std::string Response::executeCgi(const RequestConfig& req)
 
     if (pid == 0)
     {
-        // CHILD
+        // ===== CHILD =====
 
         dup2(pipefd[1], STDOUT_FILENO);
         close(pipefd[0]);
@@ -162,27 +163,33 @@ std::string Response::executeCgi(const RequestConfig& req)
         argv[0] = (char*)scriptPath.c_str();
         argv[1] = NULL;
 
-        // ENV
+        // ===== ENV =====
         std::string method = "REQUEST_METHOD=" + req.method;
 
-		std::string contentLength = "CONTENT_LENGTH=0";
+        std::string contentLength = "CONTENT_LENGTH=0";
+        std::map<std::string,std::string>::const_iterator it =
+            req.headers.find("content-length");
 
-		std::map<std::string,std::string>::const_iterator it =
-		req.headers.find("content-length");
+        if (it != req.headers.end())
+            contentLength = "CONTENT_LENGTH=" + it->second;
 
-		if (it != req.headers.end())
-			contentLength = "CONTENT_LENGTH=" + it->second;
+        std::string contentType = "CONTENT_TYPE=text/plain";
+        it = req.headers.find("content-type");
+        if (it != req.headers.end())
+            contentType = "CONTENT_TYPE=" + it->second;
 
-        char *envp[3];
+        char *envp[4];
         envp[0] = (char*)method.c_str();
         envp[1] = (char*)contentLength.c_str();
-        envp[2] = NULL;
+        envp[2] = (char*)contentType.c_str();
+        envp[3] = NULL;
 
         execve(scriptPath.c_str(), argv, envp);
         exit(1);
     }
 
-    // PARENT
+    // ===== PARENT =====
+
     close(pipefd[1]);
 
     char buffer[4096];
@@ -195,9 +202,51 @@ std::string Response::executeCgi(const RequestConfig& req)
     close(pipefd[0]);
     waitpid(pid, NULL, 0);
 
+    std::string raw = output.str();
+
+    size_t pos = raw.find("\r\n\r\n");
+    size_t offset = 4;
+
+    if (pos == std::string::npos)
+    {
+        pos = raw.find("\n\n");
+        offset = 2;
+    }
+
+    std::string body;
+    std::string headers;
+
+    if (pos != std::string::npos)
+    {
+        headers = raw.substr(0, pos);
+        body = raw.substr(pos + offset);
+    }
+    else
+    {
+        body = raw;
+    }
+
     Response res;
-    res.setBody(output.str());
+    res.setBody(body);
+
     res.setContentType("text/html");
+
+    size_t hpos = headers.find("Content-Type:");
+    if (hpos != std::string::npos)
+    {
+        size_t end = headers.find("\n", hpos);
+        std::string line = headers.substr(hpos, end - hpos);
+
+        size_t sep = line.find(":");
+        if (sep != std::string::npos)
+        {
+            std::string type = line.substr(sep + 1);
+            while (!type.empty() && type[0] == ' ')
+                type.erase(0, 1);
+
+            res.setContentType(type);
+        }
+    }
 
     return res.build();
 }
