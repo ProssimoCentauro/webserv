@@ -218,8 +218,10 @@ std::string Response::handleDelete(const RequestConfig& req,
 
 std::string Response::executeCgi(const RequestConfig& req, const std::string& interpreter)
 {
-    int pipefd[2];
-    if (pipe(pipefd) == -1)
+    int inPipe[2];
+    int outPipe[2];
+
+    if (pipe(inPipe) == -1 || pipe(outPipe) == -1)
         return buildError(500);
 
     pid_t pid = fork();
@@ -230,12 +232,15 @@ std::string Response::executeCgi(const RequestConfig& req, const std::string& in
     {
         // ===== CHILD =====
 
-        dup2(pipefd[1], STDOUT_FILENO);
-        close(pipefd[0]);
-        close(pipefd[1]);
+        dup2(inPipe[0], STDIN_FILENO);
+        dup2(outPipe[1], STDOUT_FILENO);
+
+        close(inPipe[1]);
+        close(outPipe[0]);
+        close(inPipe[0]);
+        close(outPipe[1]);
 
         std::string scriptPath = "./www" + req.uri;
-
 
         // ===== ENV =====
         std::string method = "REQUEST_METHOD=" + req.method;
@@ -269,16 +274,22 @@ std::string Response::executeCgi(const RequestConfig& req, const std::string& in
 
     // ===== PARENT =====
 
-    close(pipefd[1]);
+    close(inPipe[0]);
+    close(outPipe[1]);
+
+    if (!req.body.empty())
+        write(inPipe[1], req.body.c_str(), req.body.size());
+
+    close(inPipe[1]);
 
     char buffer[4096];
     std::stringstream output;
     ssize_t bytes;
 
-    while ((bytes = read(pipefd[0], buffer, sizeof(buffer))) > 0)
+    while ((bytes = read(outPipe[0], buffer, sizeof(buffer))) > 0)
         output.write(buffer, bytes);
 
-    close(pipefd[0]);
+    close(outPipe[0]);
     waitpid(pid, NULL, 0);
 
     std::string raw = output.str();
@@ -301,13 +312,10 @@ std::string Response::executeCgi(const RequestConfig& req, const std::string& in
         body = raw.substr(pos + offset);
     }
     else
-    {
         body = raw;
-    }
 
     Response res;
     res.setBody(body);
-
     res.setContentType("text/html");
 
     size_t hpos = headers.find("Content-Type:");
