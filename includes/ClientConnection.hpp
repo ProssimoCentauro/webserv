@@ -18,6 +18,9 @@ public:
 
     std::string& getReadBuffer();
     std::string& getWriteBuffer();
+	const ServerConfig* getServer() const;
+	
+	void setServer(const ServerConfig* srv);
 
 	void appendReadBuffer(char *buffer, ssize_t bytes);
 	void appendWriteBuffer(char *buffer, ssize_t bytes);
@@ -35,6 +38,7 @@ private:
 
 	Request _request;
     bool _requestComplete;
+	const ServerConfig* _server;
 };
 
 #endif

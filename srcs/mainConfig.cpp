@@ -34,7 +34,9 @@ int main(int ac, char **av)
 		return(1);
 	}
 	size_t size = st.st_size;
-	char *buffer = new char[size];
+	char *buffer = new char[size + 1];
+	buffer[size] = '\0';
+
 	ssize_t b_read = read(fd, buffer, size);
 	if(b_read < 0)
 	{

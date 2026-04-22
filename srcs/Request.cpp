@@ -244,6 +244,7 @@ std::string Request::GetHeaderLen()
 
 void Request::parse()
 {
+    std::cout << "Parsing request...\n";
     size_t old_size = 0;
 
     while (!request_buf.empty())
@@ -298,8 +299,12 @@ void Request::parse()
         }
 
         if (state == DONE)
+        {
+            std::cout << "Parse OK\n";
             return;
+        }
     }
+    std::cout << "Parse OK\n";
 }
 
 
