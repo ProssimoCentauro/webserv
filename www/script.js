@@ -41,3 +41,26 @@ function runCgi() {
         .then(r => r.text())
         .then(show);
 }
+
+function showCookies() {
+    show("Cookies:\n" + document.cookie);
+}
+
+function setCookie() {
+    document.cookie = "theme=dark";
+    show("Cookie set from JS");
+}
+
+function setCustomCookie() {
+    const key = document.getElementById("cookieKey").value;
+    const value = document.getElementById("cookieValue").value;
+
+    document.cookie = key + "=" + value + "; path=/";
+
+    show("Cookie set: " + key + "=" + value);
+}
+
+function showCookies() {
+    show("Cookies:\n" + document.cookie);
+}
+

@@ -67,7 +67,7 @@ bool Lexer::isSpace()
 {
 	if(input[pos] == ' ' || input[pos] == '\r' || input[pos] == '\t' || input[pos] == '\n')
 	{
-		if(input[pos] == '\n')
+		if(input[pos - 1] == '\n')
 			line++;
 		return(true);
 	}

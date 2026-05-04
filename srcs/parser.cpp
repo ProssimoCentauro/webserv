@@ -156,7 +156,7 @@ void Parser::parser()
         return;
     while(pos < token.size())
     {
-            parseServer();
+        parseServer();
     }
 }
 

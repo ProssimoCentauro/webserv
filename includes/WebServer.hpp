@@ -31,6 +31,7 @@ private:
     Poller _poller;
 	std::vector<int> _listenSockets;
     std::map<int, ClientConnection> _clients;
+	std::map<int, const ServerConfig*> _socketToServer;
 };
 
 #endif
