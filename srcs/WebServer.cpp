@@ -26,6 +26,7 @@ bool WebServer::checkRequestComplete(const std::string& buffer)
 
 void WebServer::acceptClient(int listenFd)
 {
+	std::cout << "ACCEPT ON FD=" << listenFd << std::endl;
 	int clientFd = accept(listenFd, NULL, NULL);
 	if (clientFd < 0)
 		return;
@@ -37,6 +38,17 @@ void WebServer::acceptClient(int listenFd)
 	}
 
 	ClientConnection client(clientFd);
+
+    std::map<int, const ServerConfig*>::iterator it = _socketToServer.find(listenFd);
+    if (it == _socketToServer.end())
+    {
+        std::cerr << "ERROR: no server for socket" << std::endl;
+        close(clientFd);
+        return;
+    }
+
+    client.setServer(it->second);
+
 	_clients[clientFd] = client;
 	_poller.addFd(clientFd, POLLIN);
 }
@@ -45,6 +57,8 @@ void WebServer::readClient(int clientFd)
 {
     char buffer[4096];
     ssize_t bytes = recv(clientFd, buffer, sizeof(buffer), 0);
+    const std::vector<ServerConfig>& servers = _config.getServers();
+
 
     if (bytes <= 0)
     {
@@ -57,8 +71,12 @@ void WebServer::readClient(int clientFd)
 
     try
     {
+        if (!checkRequestComplete(client.getReadBuffer()))
+            return;
+
         Request req;
         req.setBuffer(client.getReadBuffer());
+        req.getMaxBodySize(client.getServer()->client_max_body_size);
 
         try
         {
@@ -67,25 +85,25 @@ void WebServer::readClient(int clientFd)
         }
         catch (const Request::RequestException &e)
         {
-            std::cout << "Request parsing error\n";
+            std::cout << "Request parsing error: " << e.getCode() << std::endl;
 
-            std::string response;
-            response  = "HTTP/1.1 400 Bad Request\r\n";
-            response += "Content-Length: 0\r\n";
-            response += "Connection: close\r\n\r\n";
+            std::stringstream response;
+            //response += "HTTP/1.1 400 Bad Request\r\n";
+            response  << "HTTP/1.1 " << e.getCode() << " "
+                      << Response::getStatusMessage(e.getCode()) << "\r\n"
+                      << "Content-Length: 0\r\n"
+                      << "Connection: close\r\n\r\n";
 
-            client.getWriteBuffer() = response;
+            client.getWriteBuffer() = response.str();
             _poller.setEvents(clientFd, POLLOUT);
+
             return;
         }
 
-        // non completeed request -> wait recv
-        if (!req.isDone())
-            return;
 
         // DEBUG
-        std::cout << "REQUEST COMPLETE\n";
-        std::cout << client.getReadBuffer() << std::endl;
+        std::cout << "BUFFER:\n" << client.getReadBuffer() << std::endl;
+        std::cout << "REQUEST COMPLETE ✔" << std::endl;
 
         const RequestConfig& conf = req.getReqConf();
 
@@ -93,17 +111,44 @@ void WebServer::readClient(int clientFd)
         std::cout << "******************* TEST HEADERS **********" << std::endl;
         req.printHttp();
 
-        std::string response = Response::buildResponse(conf);
+
+		if (servers.empty())
+		{
+            std::cout << "URI: [" << conf.uri << "]" << std::endl;
+			closeClient(clientFd);
+			return;
+		}
+
+		const ServerConfig* srv = _clients[clientFd].getServer();
+		if (!srv)
+		{
+			std::cout << "SERVER NULL\n";
+			closeClient(clientFd);
+			return;
+		}
+
+		const ServerConfig& server = *srv;
+                
+        
+		std::string response = Response::buildResponse(conf, server);
+
 
         client.getWriteBuffer() = response;
         _poller.setEvents(clientFd, POLLOUT);
 
-        // ⚠️ buffer reset
         client.getReadBuffer().clear();
     }
-    catch (...)
+    catch (std::exception &e)
     {
-        closeClient(clientFd);
+        std::cout << "FATAL ERROR: " << e.what() << std::endl;
+
+        std::string response;
+        response  = "HTTP/1.1 500 Internal Server Error\r\n";
+        response += "Content-Length: 0\r\n";
+        response += "Connection: close\r\n\r\n";
+
+        client.getWriteBuffer() = response;
+        _poller.setEvents(clientFd, POLLOUT);
     }
 }
 
@@ -171,7 +216,9 @@ int WebServer::createListenSocket(int port)
 
 void WebServer::init(const Config& config)
 {
-	std::vector<ServerConfig> servers = config.getServers();
+    _config = config;
+    
+	const std::vector<ServerConfig>& servers = config.getServers();
 	
 	for (std::vector<ServerConfig>::const_iterator it = servers.begin();
      it != servers.end();
@@ -180,6 +227,9 @@ void WebServer::init(const Config& config)
 		int listenFd = createListenSocket(it->listen_port);
 		_listenSockets.push_back(listenFd);
 		_poller.addFd(listenFd, POLLIN);
+
+		_socketToServer[listenFd] = &(*it);
+		std::cout << "MAP INSERT: fd=" << listenFd << std::endl;
 	}
 }
 
@@ -205,9 +255,9 @@ void WebServer::exec()
             {
                 if (revents & POLLIN)
                     readClient(currentFd);
-                else if (revents & POLLOUT)
+				else if (revents & POLLOUT)
                     writeClient(currentFd);
-                else if (revents & (POLLERR | POLLHUP | POLLNVAL))
+				else if (revents & (POLLERR | POLLHUP | POLLNVAL))
                     closeClient(currentFd);
             }
 

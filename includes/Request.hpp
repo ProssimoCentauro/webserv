@@ -5,10 +5,12 @@
 #include <map>
 #include "structures.h"
 #include <cstdlib>
+#include "Config.hpp" //test
 
 class Request 
 {
 	private:
+			size_t _maxBodySize;
 			std::string request_buf;
 			RequestConfig ConfReq;
 			typedef enum e_state
@@ -28,7 +30,7 @@ class Request
 			Request& operator=(const Request& other);
 			~Request();
 			void setBuffer(std::string buf);
-			void parseRequestLine();
+			int parseRequestLine();
 			//void parseHeaders();
 			void parseBody();
 			void parse();
@@ -62,6 +64,9 @@ class Request
 						int getCode() const; 
 						virtual const char* what() const throw();
 			};
+
+			//test
+			void getMaxBodySize(size_t value);
 		
 };
 

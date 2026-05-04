@@ -18,6 +18,7 @@ ClientConnection& ClientConnection::operator=(const ClientConnection& other)
 		_readBuffer = other._readBuffer;
 		_writeBuffer = other._writeBuffer;
 		_requestComplete = other._requestComplete;
+		_server = other._server;
 	}
 	return *this;
 }
@@ -63,7 +64,17 @@ void ClientConnection::setRequestComplete(bool value)
 	_requestComplete = value;
 }
 
-Request& ClientConnection::getRequest()  //aggiunto getters per oggetto request
+Request& ClientConnection::getRequest()
 {
 	return _request;
+}
+
+void ClientConnection::setServer(const ServerConfig* srv)
+{
+    _server = srv;
+}
+
+const ServerConfig* ClientConnection::getServer() const
+{
+	return _server;
 }

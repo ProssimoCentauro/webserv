@@ -106,7 +106,6 @@ std::string Parser::incresePos(std::string str, size_t npos)
     return(token[pos].value);
 }
 
-
 void Parser::validateLocation(LocationConfig& loc)
 {
     if(validateMethods(loc) == false)
@@ -156,7 +155,7 @@ void Parser::parser()
         return;
     while(pos < token.size())
     {
-            parseServer();
+        parseServer();
     }
 }
 

@@ -1,5 +1,5 @@
 #include "Request.hpp"
-#include <iostream>
+#include "WebServ.h"
 
 
 Request::Request(std::string request_buf): request_buf(request_buf)
@@ -138,7 +138,7 @@ std::string Request::extractHeader(std::string& line)
     return key;
 }
 
-void Request::parseRequestLine()
+/*void Request::parseRequestLine()
 {
     ConfReq.method = extractToken();
     if (ConfReq.method != "GET" && ConfReq.method != "POST" &&
@@ -153,9 +153,31 @@ void Request::parseRequestLine()
 
     ConfReq.version = extractToken();
     if (ConfReq.version != "HTTP/1.0" && ConfReq.version != "HTTP/1.1")
-        throw RequestException(505);
+        throw RequestException(400);
 
     cleanTerminator();
+}*/
+
+int Request::parseRequestLine()
+{
+    int errorCode = 0;
+    ConfReq.method = extractToken();
+    if (ConfReq.method != "GET" && ConfReq.method != "POST" &&
+			ConfReq.method != "DELETE")
+        errorCode = 405;
+
+    ConfReq.uri = extractToken();
+    if (ConfReq.uri.empty() || ConfReq.uri[0] != '/')
+        throw RequestException(400);
+    if (ConfReq.uri.size() > 2048)
+        throw RequestException(414);
+
+    ConfReq.version = extractToken();
+    if (ConfReq.version != "HTTP/1.0" && ConfReq.version != "HTTP/1.1")
+        throw RequestException(400);
+
+    cleanTerminator();
+    return errorCode;
 }
 
 void Request::parseHeaders(std::string line)
@@ -180,6 +202,9 @@ void Request::parseHeaders(std::string line)
 
             std::string key = strToLower(extractHeader(headers));
             std::string value = extractHeader(headers);
+
+            if (key == "host" && value.empty() && ConfReq.version == "HTTP/1.1")
+                throw RequestException(400);
 
             size_t i = 0;
             while (i < value.size() && is_space(value[i]))
@@ -216,6 +241,11 @@ void Request::parseBody()
 		return;
 	request_buf.erase(0, pos + 2);
 	ConfReq.body += request_buf.substr(0, len);
+
+    if(ConfReq.body.size() > _maxBodySize) // TEST MAXBODYSIZE
+    {
+        throw RequestException(413);
+    }
 	request_buf.erase(0, len);
 }
 
@@ -244,7 +274,9 @@ std::string Request::GetHeaderLen()
 
 void Request::parse()
 {
+    std::cout << "Parsing request...\n";
     size_t old_size = 0;
+    int errorCode = 0;
 
     while (!request_buf.empty())
     {
@@ -258,7 +290,7 @@ void Request::parse()
             if (pos == std::string::npos)
                 return;
 
-            parseRequestLine();
+            errorCode = parseRequestLine();
             state = HEADERS;
         }
 
@@ -273,7 +305,6 @@ void Request::parse()
             }
             else
                 throw RequestException(400);
-
             if (request_buf.substr(0, 2) == "\r\n")
 			{
 				request_buf.erase(0, 2);
@@ -284,6 +315,8 @@ void Request::parse()
         if (state == BODY_CONTENT && hasContentLength("content-length"))
         {
             size_t n = std::atoi(GetHeaderLen().c_str());
+            if(_maxBodySize < n)
+                throw RequestException(413);
 
             if (request_buf.size() < n)
                 return;
@@ -292,14 +325,19 @@ void Request::parse()
             request_buf.erase(0, n);
             state = DONE;
         }
+        else if(state == BODY_CONTENT && hasContentLength("transfer-encoding"))
+            parseBody();
         else if (state == BODY_CONTENT)
-        {
             state = DONE;
-        }
-
         if (state == DONE)
+        {
+            if(errorCode > 0)
+                throw RequestException(errorCode);
+            std::cout << "Parse OK\n";
             return;
+        }
     }
+    std::cout << "Parse OK\n";
 }
 
 
@@ -331,25 +369,37 @@ void Request::printHttp()
     }
 }
 
-
 void Request::parseCookie()
 {
-    
-    for(std::map<std::string, std::string>::const_iterator it = ConfReq.headers.begin(); it != ConfReq.headers.end(); ++it)
+    std::map<std::string, std::string>::iterator it;
+
+    it = ConfReq.headers.find("cookie");
+    if (it == ConfReq.headers.end())
+        return;
+
+    std::string cookies = it->second;
+    std::stringstream ss(cookies);
+    std::string pair;
+
+    while (std::getline(ss, pair, ';'))
     {
-        if(it->first == "cookie")
-        {
-            std::string str = it->second;
-            if(!str.empty())
-            {
-                size_t pos = str.find('=');
-                std::string s1 = str.substr(0, pos);
-                pos++;
-                std::string s2 = str.erase(0, pos);
-                ConfReq.cookie.insert(std::make_pair(s1, s2));
-            }
-        }
+        size_t pos = pair.find('=');
+        if (pos == std::string::npos)
+            continue;
 
+        std::string key = pair.substr(0, pos);
+        std::string value = pair.substr(pos + 1);
+
+        while (!key.empty() && key[0] == ' ')
+            key.erase(0, 1);
+        while (!value.empty() && value[0] == ' ')
+            value.erase(0, 1);
+
+        ConfReq.cookie[key] = value;
     }
+}
 
+void Request::getMaxBodySize(size_t value)
+{
+    _maxBodySize = value;
 }
