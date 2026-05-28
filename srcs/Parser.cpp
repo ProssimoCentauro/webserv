@@ -193,7 +193,9 @@ void Parser::parseServer()
         }
         else if(isMatch("error_page"))
         {
-            conf.error_pages.insert(std::pair<int, std::string>(stringTo<int>(incresePos("error_page", 1)), checkPos(2))); 
+            int errorCode = stringTo<int>(incresePos("error_page", 1));
+            std::string errorUrl = token[pos + 1].value;
+            conf.error_pages.insert(std::pair<int, std::string>(errorCode, errorUrl)); 
             movePos(2);
         }
         else if(isMatch("location"))
@@ -274,12 +276,16 @@ void Parser::parseLocation(ServerConfig& conf)
         }
         else if(isMatch("cgi_extension"))
         {
-            loc.cgi.insert(std::pair<std::string, std::string>(incresePos("cgi_extension", 1), checkPos(2)));
+            std::string cgiExtension = incresePos("cgi_extension", 1);
+            std::string cgiTipe = token[pos + 1].value;
+            loc.cgi.insert(std::pair<std::string, std::string>(cgiExtension, cgiTipe));
             movePos(2);
         }
         else if(isMatch("return"))
         {
-            loc.redirect.insert(std::pair<int, std::string>(stringTo<int>(incresePos("return", 1)), checkPos(2)));
+            int redirError = stringTo<int>(incresePos("return", 1));
+            std::string redirUrl = token[pos + 1].value;
+            loc.redirect.insert(std::pair<int, std::string>(redirError, redirUrl));
             movePos(2);
         }
         else if(isMatch(";"))
