@@ -138,26 +138,6 @@ std::string Request::extractHeader(std::string& line)
     return key;
 }
 
-/*void Request::parseRequestLine()
-{
-    ConfReq.method = extractToken();
-    if (ConfReq.method != "GET" && ConfReq.method != "POST" &&
-			ConfReq.method != "DELETE")
-        throw RequestException(405);
-
-    ConfReq.uri = extractToken();
-    if (ConfReq.uri.empty() || ConfReq.uri[0] != '/')
-        throw RequestException(400);
-    if (ConfReq.uri.size() > 2048)
-        throw RequestException(414);
-
-    ConfReq.version = extractToken();
-    if (ConfReq.version != "HTTP/1.0" && ConfReq.version != "HTTP/1.1")
-        throw RequestException(400);
-
-    cleanTerminator();
-}*/
-
 int Request::parseRequestLine()
 {
     int errorCode = 0;
