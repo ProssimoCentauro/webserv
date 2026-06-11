@@ -234,7 +234,6 @@ std::string Response::executeCgi(const RequestConfig& req, const std::string& in
     if (pid == 0)
     {
         // ===== CHILD =====
-
         dup2(inPipe[0], STDIN_FILENO);
         dup2(outPipe[1], STDOUT_FILENO);
 
@@ -251,7 +250,6 @@ std::string Response::executeCgi(const RequestConfig& req, const std::string& in
         std::string contentLength = "CONTENT_LENGTH=0";
         std::map<std::string,std::string>::const_iterator it =
             req.headers.find("content-length");
-
         if (it != req.headers.end())
             contentLength = "CONTENT_LENGTH=" + it->second;
 
@@ -276,27 +274,65 @@ std::string Response::executeCgi(const RequestConfig& req, const std::string& in
     }
 
     // ===== PARENT =====
-
     close(inPipe[0]);
     close(outPipe[1]);
 
     if (!req.body.empty())
         write(inPipe[1], req.body.c_str(), req.body.size());
-
     close(inPipe[1]);
 
-    char buffer[4096];
-    std::stringstream output;
-    ssize_t bytes;
+    // NON BLOCKING pipe
+    int flags = fcntl(outPipe[0], F_GETFL, 0);
+    fcntl(outPipe[0], F_SETFL, flags | O_NONBLOCK);
 
-    while ((bytes = read(outPipe[0], buffer, sizeof(buffer))) > 0)
-        output.write(buffer, bytes);
+    fd_set readfds;
+    struct timeval tv;
+    std::stringstream output;
+    bool timed_out = false;
+
+    while (true)
+    {
+        FD_ZERO(&readfds);
+        FD_SET(outPipe[0], &readfds);
+
+        tv.tv_sec = CGI_TIMEOUT;
+        tv.tv_usec = 0;
+
+        int ret = select(outPipe[0] + 1, &readfds, NULL, NULL, &tv);
+        if (ret == -1)
+        {
+            timed_out = true;
+            break;
+        }
+        if (ret == 0)   // timeout 
+        {
+            timed_out = true;
+            break;
+        }
+
+        char buffer[4096];
+        ssize_t n = read(outPipe[0], buffer, sizeof(buffer));
+        if (n <= 0)
+            break;
+
+        output.write(buffer, n);
+    }
 
     close(outPipe[0]);
+
+    // child kill
+    if (timed_out)
+    {
+        kill(pid, SIGKILL);
+        waitpid(pid, NULL, WNOHANG);
+        return buildError(500);
+    }
+
+    // child wait
     waitpid(pid, NULL, 0);
 
+    // --- Parsing output CGI ---
     std::string raw = output.str();
-
     size_t pos = raw.find("\r\n\r\n");
     size_t offset = 4;
 
@@ -326,14 +362,12 @@ std::string Response::executeCgi(const RequestConfig& req, const std::string& in
     {
         size_t end = headers.find("\n", hpos);
         std::string line = headers.substr(hpos, end - hpos);
-
         size_t sep = line.find(":");
         if (sep != std::string::npos)
         {
             std::string type = line.substr(sep + 1);
             while (!type.empty() && type[0] == ' ')
                 type.erase(0, 1);
-
             res.setContentType(type);
         }
     }
