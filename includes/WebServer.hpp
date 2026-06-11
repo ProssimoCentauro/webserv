@@ -6,17 +6,24 @@
 #include "Config.hpp"
 #include "ClientConnection.hpp"
 #include "Response.hpp"
+#include "token.hpp"
+#include "Lexer.hpp"
+#include "Parser.hpp"
 
 class WebServer
 {
 public:
     WebServer();
+    WebServer(char *input, size_t size);
     WebServer(const WebServer& other);
     WebServer& operator=(const WebServer& other);
     ~WebServer();
 
     void init(const Config& config);
     void exec();
+    std::vector<Token> getToken() const;
+    void run();
+
 
 private:
     void acceptClient(int listenFd);
@@ -24,10 +31,14 @@ private:
     void writeClient(int clientFd);
     void closeClient(int clientFd);
 
+
 	int createListenSocket(int port);
 	bool checkRequestComplete(const std::string& buffer);
 
+
     Config _config;
+    Lexer _lex;
+    Parser _parse;       
     Poller _poller;
 	std::vector<int> _listenSockets;
     std::map<int, ClientConnection> _clients;

@@ -17,6 +17,7 @@ class Lexer
 	public:
 		int line;
 		Lexer(char *input, size_t size);
+		Lexer();
 		Lexer(const Lexer& other);
 		Lexer& operator=(const Lexer& other);
 		~Lexer();
@@ -28,19 +29,7 @@ class Lexer
 		void tokenizer();
 		void assignType();
 		
-		
         const std::vector<Token>& getToken() const; // per test
-
-	/*	class ConfigException : public std::exception
-		{
-			private:
-					std::string str;
-			public:
-				ConfigException(std::string str);
-				virtual ~ConfigException() throw();
-				virtual const char* what() const throw();
-		};				*/
-
 
 
 };

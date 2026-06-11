@@ -16,80 +16,48 @@ int main(int ac, char **av)
 
 	if(ac != 2)
 	{
-		//print error;
+		std::cerr << "Usage: " << av[0] << " <filename>" << std::endl;
 		return(1);
 	}
 	int fd = open(av[1], O_RDONLY);
 	if (fd < 0)
 	{
-		//print error
+		std::cerr << "Error: cannot open file" << std::endl; 
 		close(fd);
 		return(1);
 	}
 	struct stat st;
 	if(stat(av[1], &st) < 0)
 	{
-		//print error
+		std::cerr << "Error: unable to read file information" << std::endl;
 		close(fd);
 		return(1);
 	}
 	size_t size = st.st_size;
-	char *buffer = new char[size + 1];
-	buffer[size] = '\0';
-
-	ssize_t b_read = read(fd, buffer, size);
+	std::vector<char>buffer(size + 1, '\0');
+	ssize_t b_read = read(fd, &buffer[0], size);
 	if(b_read < 0)
 	{
-		//print error;
-		delete[] buffer;
+		std::cerr << "Error: reading failed" << std::endl;
 		close(fd);
 		return(1);
 	}
 	close(fd);
 
-
-	Config config;
-
 	try
 	{
-		Lexer lexer(buffer, size);
-		lexer.tokenizer();
-		lexer.printTok();
-		lexer.assignType();
-		std::cout << "==========================================="<< std::endl;
-		std::cout << "==========================================="<< std::endl;
-		std::cout << "==========================================="<< std::endl << std::endl;
-		lexer.printTok();
-		std::cout << std::endl << "*******************************************"<< std::endl;
-		std::cout << "==========================================="<< std::endl;
-		std::cout << "*******************************************"<< std::endl << std::endl;
-		std::vector<Token> t = lexer.getToken();
-		Parser paramParse(t);
-		paramParse.parser();
-		config = paramParse.getConfig();
-		std::cout << "\n" << "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*" << std::endl;
-		std::cout << "PRIMA DELLA STAMPA" << std::endl;
-		paramParse.printConfig();
-		std::cout << "\n" << "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*" << std::endl;
-		std::cout << "FINISH CONFIG FILE" << std::endl;
-
-		WebServer server;
-		server.init(config);
-		std::cout << "webserv running..." << std::endl;
-		server.exec();
+		WebServer server(&buffer[0], size);
+		server.run();
 	}
-	catch(const std::exception &e)
+	catch(std::exception& e)
 	{
 		std::cout << e.what() << std::endl;
 	}
 
-
-
-
-	
-	delete[] buffer;	
-
 }
+
+
+
 
 
 

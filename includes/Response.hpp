@@ -60,7 +60,6 @@ public:
 	static std::string generateSessionId();
 	static std::string generateAutoIndex(const std::string& path, const std::string& uri);
 	static std::string buildFileResponse(const std::string& path);
-
 };
 
 #endif

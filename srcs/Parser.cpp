@@ -5,11 +5,6 @@ Parser::Parser(): pos(0),config()
 
 }
 
-Parser::Parser(const std::vector<Token> &token): pos(0), token(token),config()
-{
-
-}
-
 Parser::Parser(const Parser& other): pos(other.pos), token(other.token), config(other.config)
 {
 
@@ -351,4 +346,9 @@ void Parser::printConfig()
 Config& Parser::getConfig()
 {
 	return config;
+}
+
+void Parser::setToken(std::vector<Token>& token) 
+{
+    this->token = token;
 }

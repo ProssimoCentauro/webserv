@@ -16,7 +16,6 @@ class Parser
 
     public:
             Parser();
-            Parser(const std::vector<Token> &token);
             Parser(const Parser& other);
             Parser& operator=(const Parser& other);
             ~Parser();
@@ -35,6 +34,7 @@ class Parser
             bool check_brackets();
             bool validateMethods(LocationConfig& loc);
             void validateLocation(LocationConfig& loc);
+            void setToken(std::vector<Token>& token);
 			
 			Config& getConfig();
 
