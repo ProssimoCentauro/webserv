@@ -378,11 +378,8 @@ void Request::parseCookie()
         ConfReq.cookie[key] = value;
     }
 }
-<<<<<<< HEAD
-=======
 
 void Request::getMaxBodySize(size_t value)
 {
     _maxBodySize = value;
 }
->>>>>>> main
