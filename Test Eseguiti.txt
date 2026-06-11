@@ -1,0 +1,189 @@
+TEST ERROR CODE :
+
+INPUT = curl -i http://localhost:8080/
+
+OUTPUT = HTTP/1.1 200 OK              -ESATTO
+
+
+INPUT = curl -i http://localhost:8080/notfound
+
+OUTPUT = HTTP/1.1 404 Not Found        -ESATTO
+
+
+INPUT = curl -i -X DELETE http://localhost:8080/
+
+OUTPUT = HTTP/1.1 405 Method Not Allowed   -ESATTO
+
+INPUT = echo "ciaoafafddaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" > big.txt
+curl -i -X POST http://localhost:8080 --data-binary @big.txt
+
+OUTPUT = HTTP/1.1 413 PAYLOAD TO LARGE   -ESATTO
+
+
+*************************************************************************************************
+
+TEST MULTISERVER:
+
+INPUT =  curl http://localhost:8080
+INPUT =	 curl http://localhost:5555
+
+OUTPUT = due server diversi con nomi diversi stampati su terminale
+
+**************************************************************************************************
+
+TEST SERVER STESSA PORTA, MA HOSTNAME DIVERSO:
+
+Configurare più server con diversi hostname (usare qualcosa come curl --resolve example.com:80:127.0.0.1 http://example.com/).
+
+-FALLITO BIND su:  int listenFd = createListenSocket(it->listen_port);
+
+**************************************************************************************************
+
+TEST CUSTOM ERROR PAGE:
+
+INPUT = curl -i http://localhost:8080/doesnotexist
+
+OUTPUT = HTTP/1.1 404 Not Found                  -ESATTO
+
+***********************************************************************************************
+
+TEST ClientMaxBody:
+
+Client_max_body size = 10;
+
+INPUT = curl -i -X POST --data "12345" http://localhost:8080/upload
+OUTPUT = 201 Created                -ESATTO
+
+INPUT = curl -i -X POST --data "123456789101112131415" http://localhost:8080/upload
+OUTPUT = 413 Playload too Large      -ESATTO
+
+************************************************************************************************
+ 
+TEST FILE TROVARE JPG IN DIRECTORY:
+
+INPUT = curl http://localhost:5555/images/image.jpg -o out.jpg
+
+OUTPUT = ritorno jpeg nella cartella images                 -ESATTO
+
+*********************************************************************************************
+
+TEST INDEX FILE:
+
+INPUT = curl http://localhost:5555/files/
+
+OUTPUT = <h1>FILES INDEX PAGE</h1>                         -ESATTO
+
+*********************************************************************************************
+
+TEST POST:
+
+INPUT =  curl -i -X POST -F "file=@upload.txt" http://localh
+ost:6666/www/uploads
+
+OUTPUT = HTTP/1.1 201 Created                               -ESATTO
+
+***********************************************************************************************
+
+TEST INVALID METHOD :
+
+INPUT =  curl -i -X PATCH http://localhost:6666
+
+OUTPUT =  HTTP/1.1 405 Method Not Allowed                             -ESATTO
+
+************************************************************************************************
+
+TEST PROTECTED E AUTOINDEX OFF
+
+INPUT = curl -i http://localhost:6666/protected
+
+OUTPUT = HTTP/1.1 403 Error                                     -ESATTO
+
+**********************************************************************************************+
+
+TEST CGI:
+
+INPUT = curl -i http://localhost:6666/cgi-bin/test.py
+
+OUTPUT = HTTP/1.1 200 OK                                         -ESATTO
+
+*************************************************************************************************
+
+TEST CON TELNET E HOST VUOTO 
+
+INPUT = telnet localhost 6666   =>   GET / HTTP/1.1 Host:
+
+OUTPUT = HTTP/1.1 400 Bad Request                                 -ESATTO
+
+**************************************************************************************************
+
+TEST CON TELNET E GET INCOMPLETA
+
+INPUT =  telnet localhost 6666  =>  GET /
+
+OUTPUT =  HTTP/1.1 400 Bad Request                                 -ESATTO
+
+****************************************************************************************************
+
+TEST CGI PHP 
+
+INPUT =  curl -i http://localhost:6666/cgi-bin/test.php
+
+OUTPUT = HTTP/1.1 200 OK                                            -ESATTO
+
+******************************************************************************************************
+
+TEST CGI BASH
+
+INPUT =  curl -i http://localhost:6666/cgi-bin/script.sh
+
+OUTPUT = HTTP/1.1 200 OK                                              -ESATTO
+
+*******************************************************************************************************
+
+TEST CGI POST PYTHON
+
+INPUT =  curl -i -X POST -d "a=1&b=2" http://localhost:6666/cgi-bin/test.py
+
+OUTPUT = HTTP/1.1 200 OK                                               -ESATTO
+
+********************************************************************************************************
+
+TEST CGI GET PYTHON
+
+INPUT = curl -i http://localhost:6666/cgi-bin/test.py
+
+OUTPUT = HTTP/1.1 200 OK                                                -ESATTO
+
+********************************************************************************************************
+
+TEST LOOP INFINITO CGI PYTHON
+
+INPUT =  curl -i http://localhost:6666/cgi-bin/hang.py
+
+OUTPUT= LOOP INFINITO                                                    -ERRORE
+
+********************************************************************************************************
+TEST RANDOM URL
+
+INPUT =  curl -i http://localhost:6666/asdflkasjdf
+
+OUTPUT = HTTP/1.1 404 Not Found                                           -ESATTO
+
+********************************************************************************************************
+TEST METHOD PUT
+
+INPUT = curl -i -X PUT http://localhost:6666/upload
+
+OUTPUT =  HTTP/1.1 405 Method Not Allowed                                 -ESATTO
+
+********************************************************************************************************
+
+ESEGUITI I DIVERSI STRESS TEST CON SIEGE:
+
+siege -c50 -t1M http://localhost:6666/
+
+siege -b http://localhost:6666/files
+
+siege -b http://localhost:6666/
+
+siege -b http://localhost:6666/root

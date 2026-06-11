@@ -14,6 +14,7 @@ private:
     std::string _contentType;
     std::map<std::string, std::string> _headers;
 
+
 public:
     Response();
 

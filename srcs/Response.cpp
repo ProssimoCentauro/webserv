@@ -33,8 +33,10 @@ std::string Response::build() const
 
     ss << "HTTP/1.1 " << _statusCode << " " << _statusMessage << "\r\n";
     ss << "Content-Length: " << _body.length() << "\r\n";
-    ss << "Content-Type: " << _contentType << "\r\n";
-
+    if(_contentType == "text/html")
+        ss << "Content-Type:text/html; charset=UTF-8\r\n";
+    else
+        ss << "Content-Type: " << _contentType << "\r\n";
     for (std::map<std::string,std::string>::const_iterator it = _headers.begin();
          it != _headers.end(); ++it)
         ss << it->first << ": " << it->second << "\r\n";
@@ -52,6 +54,7 @@ std::string Response::buildResponse(const RequestConfig& req,
 {
     std::cout << "BUILD RESPONSE\n";
     std::cout << "URI: [" << req.uri << "]" << std::endl;
+    std::cout << "SERVER-NAME: [" << server.server_name << "]" << std::endl;
     const LocationConfig* loc = matchLocation(req.uri, server);
 
     if (!loc)
@@ -421,6 +424,7 @@ std::string Response::getStatusMessage(int code)
     if (code == 404) return "Not Found";
     if (code == 405) return "Method Not Allowed";
     if (code == 500) return "Internal Server Error";
+    if (code == 413) return "Payload too Large";
 
     return "Error";
 }

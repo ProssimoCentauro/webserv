@@ -57,6 +57,8 @@ void WebServer::readClient(int clientFd)
 {
     char buffer[4096];
     ssize_t bytes = recv(clientFd, buffer, sizeof(buffer), 0);
+    const std::vector<ServerConfig>& servers = _config.getServers();
+
 
     if (bytes <= 0)
     {
@@ -74,6 +76,7 @@ void WebServer::readClient(int clientFd)
 
         Request req;
         req.setBuffer(client.getReadBuffer());
+        req.getMaxBodySize(client.getServer()->client_max_body_size);
 
         try
         {
@@ -82,15 +85,18 @@ void WebServer::readClient(int clientFd)
         }
         catch (const Request::RequestException &e)
         {
-            std::cout << "Request parsing error\n";
+            std::cout << "Request parsing error: " << e.getCode() << std::endl;
 
-            std::string response;
-            response  = "HTTP/1.1 400 Bad Request\r\n";
-            response += "Content-Length: 0\r\n";
-            response += "Connection: close\r\n\r\n";
+            std::stringstream response;
+            //response += "HTTP/1.1 400 Bad Request\r\n";
+            response  << "HTTP/1.1 " << e.getCode() << " "
+                      << Response::getStatusMessage(e.getCode()) << "\r\n"
+                      << "Content-Length: 0\r\n"
+                      << "Connection: close\r\n\r\n";
 
-            client.getWriteBuffer() = response;
+            client.getWriteBuffer() = response.str();
             _poller.setEvents(clientFd, POLLOUT);
+
             return;
         }
 
@@ -105,16 +111,12 @@ void WebServer::readClient(int clientFd)
         std::cout << "******************* TEST HEADERS **********" << std::endl;
         req.printHttp();
 
-		const std::vector<ServerConfig>& servers = _config.getServers();
-
 		if (servers.empty())
 		{
             std::cout << "URI: [" << conf.uri << "]" << std::endl;
 			closeClient(clientFd);
 			return;
 		}
-
-
 
 		const ServerConfig* srv = _clients[clientFd].getServer();
 		if (!srv)
@@ -262,15 +264,4 @@ void WebServer::exec()
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
 
