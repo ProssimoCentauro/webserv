@@ -351,7 +351,7 @@ std::string Response::executeCgi(const RequestConfig& req, const std::string& in
         body = raw.substr(pos + offset);
     }
     else
-        body = raw;
+		return buildError(500);
 
     Response res;
     res.setBody(body);
