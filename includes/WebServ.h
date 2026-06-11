@@ -16,4 +16,8 @@
 #include <sys/stat.h>
 #include <fstream>
 #include <dirent.h>
+
+
+#define CGI_TIMEOUT 5  // seconds
+
 #endif

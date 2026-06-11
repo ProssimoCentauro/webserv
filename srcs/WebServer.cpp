@@ -111,7 +111,6 @@ void WebServer::readClient(int clientFd)
         std::cout << "******************* TEST HEADERS **********" << std::endl;
         req.printHttp();
 
-
 		if (servers.empty())
 		{
             std::cout << "URI: [" << conf.uri << "]" << std::endl;
@@ -131,7 +130,6 @@ void WebServer::readClient(int clientFd)
                 
         
 		std::string response = Response::buildResponse(conf, server);
-
 
         client.getWriteBuffer() = response;
         _poller.setEvents(clientFd, POLLOUT);
@@ -266,15 +264,4 @@ void WebServer::exec()
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
 

@@ -27,6 +27,8 @@ private:
 	int createListenSocket(int port);
 	bool checkRequestComplete(const std::string& buffer);
 
+	void	signal_handler(void);
+
     Config _config;
     Poller _poller;
 	std::vector<int> _listenSockets;
