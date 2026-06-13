@@ -4,7 +4,7 @@
 #include "Config.hpp"
 #include "token.hpp"
 #include <sstream>
-#include <iostream> //per test
+#include <iostream> 
 
 class Parser
 {
@@ -19,7 +19,7 @@ class Parser
             Parser(const Parser& other);
             Parser& operator=(const Parser& other);
             ~Parser();
-            void printConfig(); // test
+            void printConfig(); // debug
             bool isNumber(std::string &s);
 
             std::string& checkPos(size_t n);

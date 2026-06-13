@@ -20,9 +20,10 @@ public:
     ~WebServer();
 
     void init(const Config& config);
-    void exec();
-    std::vector<Token> getToken() const;
     void run();
+    std::vector<Token> getToken() const;
+    void exec();
+    void closeAllSockets() const;
 
 
 private:

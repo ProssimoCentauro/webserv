@@ -247,7 +247,7 @@ static void signal_handler(int signal)
     serverstate = 0;
 }
 
-void WebServer::exec()
+void WebServer::run()
 {
     signal(SIGINT,signal_handler);
     while (serverstate)
@@ -280,18 +280,17 @@ void WebServer::exec()
                 ++i;
         }
     }
+    if (!serverstate)
+        closeAllSockets();
 }
 
-
-
-// test 
 
 std::vector<Token> WebServer::getToken() const
 {
     return _lex.getToken();
 }
 
-void WebServer::run()
+void WebServer::exec()
 {
     _lex.tokenizer();
     _lex.printTok();  // printf for debug
@@ -302,6 +301,14 @@ void WebServer::run()
     _config = _parse.getConfig();
     _parse.printConfig(); //printf for debug
     init(_config);
-    exec();
+    run();
 }
+
+
+void WebServer::closeAllSockets() const
+{
+    int len = _listenSockets.size();
+    for(int i = 0; i < len; i++)
+        close(_listenSockets[i]);
+};
 

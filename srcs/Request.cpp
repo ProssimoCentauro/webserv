@@ -222,7 +222,7 @@ void Request::parseBody()
 	request_buf.erase(0, pos + 2);
 	ConfReq.body += request_buf.substr(0, len);
 
-    if(ConfReq.body.size() > _maxBodySize) // TEST MAXBODYSIZE
+    if(ConfReq.body.size() > _maxBodySize)
     {
         throw RequestException(413);
     }

@@ -90,8 +90,6 @@ void Lexer::lexSymbol()
 {
 	size_t start = pos;
 	Token tok;
-	/*while(pos < size && isSymbol() == true)
-		pos++;*/
 	if(isSymbol() == true)
 		pos++;
 	tok.value = std::string(input + start, pos - start);
