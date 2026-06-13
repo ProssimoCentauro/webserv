@@ -1,5 +1,6 @@
 #include "WebServer.hpp"
 
+volatile sig_atomic_t WebServer::_serverState = 1;
 
 WebServer::WebServer(){}
 
@@ -238,19 +239,17 @@ void WebServer::init(const Config& config)
 	}
 }
 
-int serverstate = 1;
-
-static void signal_handler(int signal)
+void WebServer::signal_handler(int signal)
 {
     (void)signal;
     write(1, "\n", 1);
-    serverstate = 0;
+    _serverState = 0;
 }
 
 void WebServer::run()
 {
     signal(SIGINT,signal_handler);
-    while (serverstate)
+    while (_serverState)
     {
         _poller.wait(-1);
 
@@ -280,7 +279,7 @@ void WebServer::run()
                 ++i;
         }
     }
-    if (!serverstate)
+    if (!_serverState)
         closeAllSockets();
 }
 
