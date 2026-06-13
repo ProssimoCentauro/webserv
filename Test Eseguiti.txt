@@ -77,8 +77,7 @@ OUTPUT = <h1>FILES INDEX PAGE</h1>                         -ESATTO
 
 TEST POST:
 
-INPUT =  curl -i -X POST -F "file=@upload.txt" http://localh
-ost:6666/www/uploads
+INPUT =  curl -i -X POST -F "fil=@www/uploads/uploads.txt" http://localhost:6666/upload
 
 OUTPUT = HTTP/1.1 201 Created                               -ESATTO
 
@@ -102,7 +101,7 @@ OUTPUT = HTTP/1.1 403 Error                                     -ESATTO
 
 TEST CGI:
 
-INPUT = curl -i http://localhost:6666/cgi-bin/test.py
+INPUT = curl -i http://localhost:6666/cgi-bin/post.py
 
 OUTPUT = HTTP/1.1 200 OK                                         -ESATTO
 
@@ -128,13 +127,13 @@ TEST CGI PHP
 
 INPUT =  curl -i http://localhost:6666/cgi-bin/test.php
 
-OUTPUT = HTTP/1.1 200 OK                                            -ESATTO
+vecchio OUTPUT = HTTP/1.1 200 OK                                            -ESATTO
 
 ******************************************************************************************************
 
 TEST CGI BASH
 
-INPUT =  curl -i http://localhost:6666/cgi-bin/script.sh
+INPUT =  curl -i http://localhost:6666/cgi-bin/test.sh
 
 OUTPUT = HTTP/1.1 200 OK                                              -ESATTO
 
@@ -142,7 +141,7 @@ OUTPUT = HTTP/1.1 200 OK                                              -ESATTO
 
 TEST CGI POST PYTHON
 
-INPUT =  curl -i -X POST -d "a=1&b=2" http://localhost:6666/cgi-bin/test.py
+INPUT =  curl -i -X POST -d "a=1&b=2" http://localhost:6666/cgi-bin/post.py
 
 OUTPUT = HTTP/1.1 200 OK                                               -ESATTO
 
@@ -150,7 +149,7 @@ OUTPUT = HTTP/1.1 200 OK                                               -ESATTO
 
 TEST CGI GET PYTHON
 
-INPUT = curl -i http://localhost:6666/cgi-bin/test.py
+INPUT = curl -i http://localhost:6666/cgi-bin/hello.py
 
 OUTPUT = HTTP/1.1 200 OK                                                -ESATTO
 

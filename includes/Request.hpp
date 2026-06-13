@@ -5,7 +5,7 @@
 #include <map>
 #include "structures.h"
 #include <cstdlib>
-#include "Config.hpp" //test
+#include "Config.hpp" 
 
 class Request 
 {
@@ -31,7 +31,6 @@ class Request
 			~Request();
 			void setBuffer(std::string buf);
 			int parseRequestLine();
-			//void parseHeaders();
 			void parseBody();
 			void parse();
 			std::string extractToken();
@@ -41,19 +40,16 @@ class Request
 			void cleanTerminator();
 			std::string strToLower(std::string str);
 			const RequestConfig& getReqConf() const;
-
 			bool hasContentLength(std::string s);
 			std::string GetHeaderLen();
-			//std::string extractHeader();
 			bool is_number(std::string str);
 			std::string strTrim(std::string str, size_t pos);
 			bool isDone() const;
-
-			//test
 			void parseHeaders(std::string line);
 			std::string extractHeader(std::string& line);
 			void printHttp();
-			void parseCookie(); //TEst
+			void parseCookie();
+			void getMaxBodySize(size_t value);
 
 			class RequestException : public std::exception
 			{
@@ -64,9 +60,6 @@ class Request
 						int getCode() const; 
 						virtual const char* what() const throw();
 			};
-
-			//test
-			void getMaxBodySize(size_t value);
 		
 };
 

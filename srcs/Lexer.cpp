@@ -6,6 +6,11 @@ Lexer::Lexer(char *input, size_t size): pos(0), size(size), input(input), line(1
 
 }
 
+Lexer::Lexer(): pos(0), size(0), input(""), line(1)
+{
+
+}
+
 Lexer::~Lexer()
 {
 
@@ -85,8 +90,6 @@ void Lexer::lexSymbol()
 {
 	size_t start = pos;
 	Token tok;
-	/*while(pos < size && isSymbol() == true)
-		pos++;*/
 	if(isSymbol() == true)
 		pos++;
 	tok.value = std::string(input + start, pos - start);
@@ -113,37 +116,6 @@ void Lexer::takeToken()
 	token.push_back(tok);
 }
 
-/*void Lexer::tokenizer()
-{
-	TokenRule rule[] = {
-		{&Lexer::isNumber, &Lexer::lexNumber},
-		{&Lexer::isWord, &Lexer::lexWord},
-		{&Lexer::isSymbol, &Lexer::lexSymbol},
-		{&Lexer::isPath, &Lexer::lexPath}
-	};
-
-	while(pos < size)
-	{
-		if(isSpace())
-			pos++;
-		bool is_matched = false;		
-		for(int i = 0; i < 4; i++)
-		{
-			if(isSpace())
-				pos++;
-			if((this->*rule[i].condition)() == true)
-			{
-				(this->*rule[i].lexFunction)();
-				is_matched = true;
-				break;
-			}
-			if(i == 4 && !is_matched)
-				pos++;
-		}
-
-	}
-		
-}*/
 
 void Lexer::tokenizer()
 {
@@ -225,6 +197,8 @@ const std::vector<Token>& Lexer::getToken() const
 {
 	return token;
 }
+
+
 
 
 

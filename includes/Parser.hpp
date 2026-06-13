@@ -4,7 +4,7 @@
 #include "Config.hpp"
 #include "token.hpp"
 #include <sstream>
-#include <iostream> //per test
+#include <iostream> 
 
 class Parser
 {
@@ -16,11 +16,10 @@ class Parser
 
     public:
             Parser();
-            Parser(const std::vector<Token> &token);
             Parser(const Parser& other);
             Parser& operator=(const Parser& other);
             ~Parser();
-            void printConfig(); // test
+            void printConfig(); // debug
             bool isNumber(std::string &s);
 
             std::string& checkPos(size_t n);
@@ -35,6 +34,7 @@ class Parser
             bool check_brackets();
             bool validateMethods(LocationConfig& loc);
             void validateLocation(LocationConfig& loc);
+            void setToken(std::vector<Token>& token);
 			
 			Config& getConfig();
 

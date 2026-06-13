@@ -47,14 +47,5 @@ typedef struct s_request
     std::map<std::string, std::string> cookie;
 } RequestConfig;
 
-/*typedef struct e_state
-{
-	REQUEST_LINE,
-	HEADERS,
-	BODY,
-	CHUNKED_BODY,
-	END
 
-} RequestState;
-*/
 #endif

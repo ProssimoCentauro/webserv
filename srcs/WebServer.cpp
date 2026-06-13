@@ -1,7 +1,12 @@
 #include "WebServer.hpp"
 
 
-WebServer::WebServer() {}
+WebServer::WebServer(){}
+
+WebServer::WebServer(char *input, size_t size): _lex(input, size)
+{
+   
+}
 
 WebServer::WebServer(const WebServer& other) {*this = other;}
 
@@ -13,6 +18,8 @@ WebServer& WebServer::operator=(const WebServer& other)
 		this->_poller = other._poller;
 		this->_listenSockets = other._listenSockets;
 		this->_clients = other._clients;
+        this->_parse = other._parse;
+        this->_lex = other._lex;
 	}
 	return *this;
 }
@@ -231,9 +238,19 @@ void WebServer::init(const Config& config)
 	}
 }
 
-void WebServer::exec()
+int serverstate = 1;
+
+static void signal_handler(int signal)
 {
-    while (true)
+    (void)signal;
+    write(1, "\n", 1);
+    serverstate = 0;
+}
+
+void WebServer::run()
+{
+    signal(SIGINT,signal_handler);
+    while (serverstate)
     {
         _poller.wait(-1);
 
@@ -263,5 +280,32 @@ void WebServer::exec()
                 ++i;
         }
     }
+    if (!serverstate)
+        closeAllSockets();
 }
 
+std::vector<Token> WebServer::getToken() const
+{
+    return _lex.getToken();
+}
+
+void WebServer::exec()
+{
+    _lex.tokenizer();
+    _lex.printTok();  // printf for debug
+    _lex.assignType();
+    std::vector<Token> t = getToken();
+    _parse.setToken(t);
+    _parse.parser();
+    _config = _parse.getConfig();
+    _parse.printConfig(); //printf for debug
+    init(_config);
+    run();
+}
+
+void WebServer::closeAllSockets() const
+{
+    int len = _listenSockets.size();
+    for(int i = 0; i < len; i++)
+        close(_listenSockets[i]);
+};
