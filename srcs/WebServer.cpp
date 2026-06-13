@@ -284,7 +284,6 @@ void WebServer::run()
         closeAllSockets();
 }
 
-
 std::vector<Token> WebServer::getToken() const
 {
     return _lex.getToken();
@@ -304,11 +303,9 @@ void WebServer::exec()
     run();
 }
 
-
 void WebServer::closeAllSockets() const
 {
     int len = _listenSockets.size();
     for(int i = 0; i < len; i++)
         close(_listenSockets[i]);
 };
-

@@ -36,6 +36,7 @@ private:
 	int createListenSocket(int port);
 	bool checkRequestComplete(const std::string& buffer);
 
+	void	signal_handler(void);
 
     Config _config;
     Lexer _lex;
