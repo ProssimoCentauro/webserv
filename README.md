@@ -112,7 +112,7 @@ webserv/
 |   └── [all class declarations]
 |
 ├── www/
-|   ├── cgu-bin/
+|   ├── cgi-bin/
 |   ├── errors/
 |   ├── files/
 |   ├── images/
