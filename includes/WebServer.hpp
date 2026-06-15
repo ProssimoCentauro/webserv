@@ -25,6 +25,7 @@ public:
     void exec();
     void closeAllSockets() const;
 
+    static void signal_handler(int);
 
 private:
     void acceptClient(int listenFd);
@@ -36,8 +37,6 @@ private:
 	int createListenSocket(int port);
 	bool checkRequestComplete(const std::string& buffer);
 
-	void	signal_handler(void);
-
     Config _config;
     Lexer _lex;
     Parser _parse;       
@@ -45,6 +44,8 @@ private:
 	std::vector<int> _listenSockets;
     std::map<int, ClientConnection> _clients;
 	std::map<int, const ServerConfig*> _socketToServer;
+	
+	static volatile sig_atomic_t _serverState;
 };
 
 #endif
